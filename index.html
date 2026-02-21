@@ -1,0 +1,1168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVVRS Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ===== ANIMATED BACKGROUND ===== */
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            padding: 18px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        body.light-mode {
+            background: linear-gradient(270deg, #AFF1D3, #073f3f, #0a6e6e, #AFF1D3);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            color: #111;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(270deg, #0a0a1a, #050510, #080820, #0d0d25, #060615);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            color: #e0e0e0;
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particles-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ===== TOP BAR ===== */
+        .top-bar {
+            max-width: 900px; margin: 0 auto 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 10px; position: relative; z-index: 10;
+        }
+        .dark-toggle-btn {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: #fff; padding: 7px 18px; border-radius: 30px;
+            cursor: pointer; font-size: 13px; font-weight: bold;
+            backdrop-filter: blur(6px); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .dark-toggle-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.04); }
+
+        /* Crew data status badge */
+        .crew-status-badge {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: #fff; padding: 7px 14px; border-radius: 30px;
+            font-size: 12px; font-weight: bold;
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .crew-status-badge.loading { border-color: #ffd700; color: #ffd700; }
+        .crew-status-badge.success { border-color: #4af; color: #4af; }
+        .crew-status-badge.error   { border-color: #f66; color: #f66; }
+        .badge-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: currentColor; display: inline-block;
+            animation: pulse 1.4s ease infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* ===== REPORT WRAPPER ===== */
+        #fullReport {
+            background: #fff; width: 100%; max-width: 900px;
+            margin: 0 auto; padding: 20px 24px 30px;
+            border: 2px solid #073f3f; position: relative; z-index: 5;
+            transition: background 0.4s, color 0.4s, border-color 0.4s;
+        }
+        body.dark-mode #fullReport { background: #1a1a2e; border-color: #4a90d9; color: #e0e0e0; }
+
+        /* ===== HEADER BANNER ===== */
+        .report-header {
+            background-color: #082025; color: #fff;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px; margin-bottom: 6px; border-radius: 4px 4px 0 0;
+        }
+        body.dark-mode .report-header { background-color: #0d1b2a; border: 1px solid #4a90d9; }
+        .report-header .logo-box {
+            width: 72px; height: 72px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .report-header .logo-box img { width: 72px; height: 72px; object-fit: contain; border-radius: 4px; }
+        .report-header .header-text { flex: 1; text-align: center; padding: 0 10px; }
+        .report-title { font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #fff; line-height: 1.3; }
+        .report-subtitle { font-size: 15px; font-weight: bold; color: #c8dff5; margin-top: 4px; }
+
+        /* ===== DIVIDERS ===== */
+        .full-line { width: 100%; height: 4px; background-color: rgb(12,53,59); margin: 10px 0; transition: background 0.4s; }
+        body.dark-mode .full-line { background-color: #4a90d9; }
+        .thin-line { width: 100%; height: 1px; background-color: #aaa; margin: 8px 0; }
+
+        /* ===== INFO TABLE ===== */
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+        .info-table td { padding: 5px 8px; vertical-align: middle; }
+        .info-table .field-label { font-weight: bold; white-space: nowrap; width: 130px; color: #111; }
+        body.dark-mode .info-table .field-label { color: #a0c4ff; }
+        .info-table .field-value { width: 170px; }
+        .info-table input[type="text"],
+        .info-table input[type="date"] {
+            width: 100%; height: 24px; padding: 3px 6px; font-size: 13px;
+            background-color: #d6dde1; border: 1px solid #888; border-radius: 3px;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .info-table input[type="text"],
+        body.dark-mode .info-table input[type="date"] { background-color: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+
+        /* ===== SECTION HEADING ===== */
+        .section-heading {
+            background-color: #003366; color: #fff; text-align: center;
+            font-size: 15px; font-weight: bold; padding: 6px 0;
+            margin: 12px 0 8px; letter-spacing: 2px; transition: background 0.4s;
+        }
+        body.dark-mode .section-heading { background-color: #1a3a6e; border: 1px solid #4a90d9; }
+        .section-heading.spaced { letter-spacing: 14px; }
+
+        /* ===== CREW TABLE ===== */
+        .crew-table { width: 100%; border-collapse: collapse; border: 1px solid #aaa; margin-bottom: 10px; }
+        body.dark-mode .crew-table { border-color: #4a90d9; }
+        .crew-table th {
+            background-color: #003366; color: #fff;
+            text-align: center; padding: 7px; font-size: 14px; width: 50%;
+        }
+        body.dark-mode .crew-table th { background-color: #1a3a6e; }
+        .crew-table td { padding: 5px 10px; vertical-align: middle; border-bottom: 1px solid #ddd; }
+        body.dark-mode .crew-table td { border-bottom-color: #2a2a4a; }
+        .crew-table .crew-label { font-weight: bold; width: 140px; white-space: nowrap; }
+        body.dark-mode .crew-table .crew-label { color: #a0c4ff; }
+        .crew-table .crew-val { width: calc(50% - 140px); }
+        .crew-table .divider-col { width: 1px; background-color: #aaa; padding: 0; }
+        body.dark-mode .crew-table .divider-col { background-color: #4a90d9; }
+        .crew-table input[type="text"] {
+            width: 100%; height: 24px; padding: 3px 6px; font-size: 13px;
+            background-color: #d6dde1; border: 1px solid #888; border-radius: 3px;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .crew-table input[type="text"] { background-color: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+
+        /* ===== AUTOCOMPLETE ===== */
+        .autocomplete-wrapper { position: relative; width: 100%; }
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #fff; border: 1px solid #888; border-top: none;
+            max-height: 220px; overflow-y: auto; z-index: 1000;
+            border-radius: 0 0 4px 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        }
+        body.dark-mode .autocomplete-list { background: #1e1e3a; border-color: #4a90d9; }
+        .autocomplete-list .ac-item {
+            padding: 7px 10px; cursor: pointer; font-size: 12.5px;
+            border-bottom: 1px solid #eee; transition: background 0.15s;
+        }
+        body.dark-mode .autocomplete-list .ac-item { border-bottom-color: #2a2a4a; color: #e0e0e0; }
+        .autocomplete-list .ac-item:hover { background: #e3f0ff; }
+        body.dark-mode .autocomplete-list .ac-item:hover { background: #2a3a6e; }
+        .autocomplete-list .ac-item .ac-name { font-weight: bold; color: #003366; }
+        body.dark-mode .autocomplete-list .ac-item .ac-name { color: #7ab8f5; }
+        .autocomplete-list .ac-item .ac-meta { font-size: 11px; color: #666; margin-left: 6px; }
+        body.dark-mode .autocomplete-list .ac-item .ac-meta { color: #aaa; }
+        .autocomplete-list .ac-empty { padding: 10px; text-align: center; color: #888; font-size: 12px; }
+
+        /* Crew loading spinner inside input area */
+        .crew-loading-msg {
+            font-size: 11px; color: #888; padding: 3px 0; font-style: italic;
+        }
+
+        /* Manual entry btn */
+        .manual-entry-btn {
+            font-size: 11px; padding: 2px 8px; margin-top: 3px;
+            background: #e07b00; color: #fff; border: none;
+            border-radius: 4px; cursor: pointer; display: block; width: 100%;
+            transition: background 0.2s;
+        }
+        .manual-entry-btn:hover { background: #c06000; }
+
+        /* ===== OBSERVATION ===== */
+        .obs-container {
+            border: 2px solid #000; padding: 10px 14px; background: #fff;
+            transition: background 0.4s, border-color 0.4s;
+        }
+        body.dark-mode .obs-container { background: #12122a; border-color: #4a90d9; }
+        .obs-row { display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 4px 0; }
+        body.dark-mode .obs-row { border-bottom-color: #2a2a3a; }
+        .obs-row:last-child { border-bottom: none; }
+        .obs-label { flex: 1; font-weight: bold; font-size: 12.5px; padding-right: 10px; }
+        .obs-row select {
+            width: 100px; padding: 4px; font-size: 13px;
+            border: 1px solid #888; border-radius: 3px; background: #d6dde1; flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .obs-row select { background: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        .obs-row input[type="text"] {
+            width: 200px; height: 26px; padding: 3px 6px; font-size: 13px;
+            background-color: #d6dde1; border: 1px solid #888; border-radius: 3px; flex-shrink: 0;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .obs-row input[type="text"] { background-color: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        .remarks-area {
+            width: 100%; height: 80px; padding: 6px; font-size: 13px;
+            border: 1px solid #888; border-radius: 3px; background: #d6dde1;
+            resize: vertical; margin-top: 6px; transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .remarks-area { background: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+
+        /* ===== IMAGE GRID ===== */
+        .img-section-title {
+            text-align: center; font-size: 16px; font-weight: bold;
+            margin: 14px 0 10px; color: #003366; transition: color 0.4s;
+        }
+        body.dark-mode .img-section-title { color: #7ab8f5; }
+        .img-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+        .img-card {
+            border: 1px solid #aaa; border-radius: 5px; padding: 8px;
+            background: #f8f8f8; text-align: center; transition: background 0.4s, border-color 0.4s;
+        }
+        body.dark-mode .img-card { background: #1e1e3a; border-color: #4a90d9; }
+        .img-card-label {
+            font-size: 11.5px; font-weight: bold; color: #003366;
+            margin-bottom: 6px; display: block; min-height: 32px;
+        }
+        body.dark-mode .img-card-label { color: #7ab8f5; }
+        .img-card img {
+            width: 100%; height: 130px; object-fit: cover; display: none;
+            border: 2px solid rgb(172,213,75); border-radius: 3px; margin-bottom: 6px;
+        }
+        .img-card input[type="file"] { font-size: 11px; width: 100%; }
+
+        /* ===== BUTTONS ===== */
+        .btn-generate {
+            display: block; margin: 18px auto; padding: 11px 36px; font-size: 16px;
+            background-color: #003366; color: #fff; border: none; border-radius: 6px;
+            cursor: pointer; max-width: 900px; width: 100%;
+            transition: background 0.3s, transform 0.2s; position: relative; z-index: 5;
+        }
+        .btn-generate:hover { background-color: #005599; transform: scale(1.01); }
+        .btn-submit-gs {
+            display: block; margin: 8px auto; padding: 11px 36px; font-size: 16px;
+            background-color: #1a7a1a; color: #fff; border: none; border-radius: 6px;
+            cursor: pointer; max-width: 900px; width: 100%;
+            transition: background 0.3s, transform 0.2s; position: relative; z-index: 5;
+        }
+        .btn-submit-gs:hover { background-color: #228b22; transform: scale(1.01); }
+        .btn-reload-crew {
+            display: block; margin: 8px auto; padding: 9px 36px; font-size: 14px;
+            background-color: #7b3f00; color: #fff; border: none; border-radius: 6px;
+            cursor: pointer; max-width: 900px; width: 100%;
+            transition: background 0.3s, transform 0.2s; position: relative; z-index: 5;
+        }
+        .btn-reload-crew:hover { background-color: #a05000; transform: scale(1.01); }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #1a7a1a; color: #fff; padding: 14px 28px;
+            border-radius: 8px; font-size: 15px; font-weight: bold;
+            z-index: 9999; opacity: 0; transition: opacity 0.4s ease;
+            pointer-events: none; min-width: 300px; text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        }
+        .toast.error { background: #cc2200; }
+        .toast.show { opacity: 1; }
+
+        /* ===== PRINT VALUE ===== */
+        .print-value { display: none; font-weight: normal; font-size: 13px; }
+
+        /* ===== LOADING OVERLAY ===== */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.65);
+            z-index: 9998; align-items: center; justify-content: center;
+            flex-direction: column; gap: 14px; color: #fff;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 52px; height: 52px;
+            border: 6px solid rgba(255,255,255,0.2);
+            border-top-color: #4af; border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="light-mode">
+
+<canvas class="particles-canvas" id="particleCanvas"></canvas>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingMsg" style="font-size:16px;">Processing...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- ================================================================
+     TOP BAR
+     ================================================================ -->
+<div class="top-bar">
+    <div class="crew-status-badge loading" id="crewStatusBadge">
+        <span class="badge-dot"></span>
+        <span id="crewStatusText">Loading crew data...</span>
+    </div>
+    <button class="dark-toggle-btn" onclick="toggleDarkMode()" id="darkBtn">
+        <span class="toggle-moon">🌙</span> Dark Mode
+    </button>
+</div>
+
+<!-- ================================================================
+     FULL REPORT
+     ================================================================ -->
+<div id="fullReport">
+
+    <!-- HEADER -->
+    <div class="report-header">
+        <div class="logo-box">
+            <img id="logoLeft" src="rail.jpeg" alt="Railway Logo" onerror="this.style.display='none'" style="display:none;">
+            <div id="logoLeftPlaceholder" style="width:72px;height:72px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;color:#003366;font-weight:bold;text-align:center;line-height:1.2;padding:4px;">INDIAN<br>RAILWAYS</div>
+        </div>
+        <div class="header-text">
+            <div class="report-title">CVVRS ANALYSIS REPORT</div>
+            <div class="report-subtitle">Raipur Division</div>
+        </div>
+        <div class="logo-box">
+            <img id="logoRight" src="rail.jpeg" alt="Railway Logo" onerror="this.style.display='none'" style="display:none;">
+            <div id="logoRightPlaceholder" style="width:72px;height:72px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;color:#003366;font-weight:bold;text-align:center;line-height:1.2;padding:4px;">INDIAN<br>RAILWAYS</div>
+        </div>
+    </div>
+    <div class="full-line"></div>
+
+    <!-- GENERAL INFO -->
+    <table class="info-table">
+        <tr>
+            <td class="field-label">Analysed By:</td>
+            <td class="field-value"><input type="text" id="analysedby" name="analysedby"></td>
+            <td class="field-label">Month:</td>
+            <td class="field-value"><input type="text" id="month" name="month"></td>
+            <td class="field-label">Count:</td>
+            <td class="field-value"><input type="text" id="count" name="count"></td>
+        </tr>
+        <tr>
+            <td class="field-label">Loco No:</td>
+            <td class="field-value"><input type="text" id="locoNo" name="locono"></td>
+            <td class="field-label">SHED:</td>
+            <td class="field-value"><input type="text" id="Shed" name="shed"></td>
+            <td class="field-label">Leading Cab:</td>
+            <td class="field-value"><input type="text" id="leadingCab" name="leadingcab"></td>
+        </tr>
+        <tr>
+            <td class="field-label">Train No:</td>
+            <td class="field-value"><input type="text" id="trainno" name="trainno"></td>
+            <td class="field-label">Analysis From:</td>
+            <td class="field-value"><input type="text" id="analysisfrom" name="analysisfrom"></td>
+            <td class="field-label">Analysis Up To:</td>
+            <td class="field-value"><input type="text" id="analysisupto" name="analysisupto"></td>
+        </tr>
+        <tr>
+            <td class="field-label">Section:</td>
+            <td class="field-value"><input type="text" id="section" name="section"></td>
+            <td class="field-label">From Station:</td>
+            <td class="field-value"><input type="text" id="fromstation" name="fromstation"></td>
+            <td class="field-label">To Station:</td>
+            <td class="field-value"><input type="text" id="tostation" name="tostation"></td>
+        </tr>
+        <tr>
+            <td class="field-label">Working Date:</td>
+            <td class="field-value"><input type="text" id="workingdate" name="workingdate"></td>
+            <td class="field-label">Departure Time:</td>
+            <td class="field-value"><input type="text" id="departuretime" name="departuretime"></td>
+            <td class="field-label">Arrival Time:</td>
+            <td class="field-value"><input type="text" id="arrivaltime" name="arrivaltime"></td>
+        </tr>
+        <tr>
+            <td class="field-label">Analysis date:</td>
+            <td class="field-value"><input type="text" id="analysisdate" name="analysisdate"></td>
+            <td class="field-label">Load:</td>
+            <td class="field-value"><input type="text" id="Load" name="load"></td>
+            <td class="field-label">CVVRS Make:</td>
+            <td class="field-value"><input type="text" id="cvvrsmake" name="cvvrsmake"></td>
+        </tr>
+    </table>
+
+    <div class="full-line"></div>
+
+    <!-- LP / ALP CREW TABLE -->
+    <table class="crew-table">
+        <thead>
+            <tr>
+                <th colspan="2">LP DETAILS</th>
+                <td class="divider-col"></td>
+                <th colspan="2">ALP DETAILS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- NAME with live autocomplete -->
+            <tr>
+                <td class="crew-label">NAME</td>
+                <td class="crew-val">
+                    <div class="autocomplete-wrapper" id="lpNameWrapper">
+                        <input type="text" id="lpname" autocomplete="off"
+                               placeholder="Type LP name or ID..."
+                               oninput="handleAutocomplete('lp', this.value)"
+                               onfocus="handleAutocomplete('lp', this.value)">
+                        <div class="autocomplete-list" id="lpDropdown" style="display:none;"></div>
+                    </div>
+                    <button class="manual-entry-btn" onclick="enableManualEntry('lp')" id="lpManualBtn">
+                        ✏️ Name not in list? Manual Entry
+                    </button>
+                </td>
+                <td class="divider-col"></td>
+                <td class="crew-label">NAME</td>
+                <td class="crew-val">
+                    <div class="autocomplete-wrapper" id="alpNameWrapper">
+                        <input type="text" id="alpname" autocomplete="off"
+                               placeholder="Type ALP name or ID..."
+                               oninput="handleAutocomplete('alp', this.value)"
+                               onfocus="handleAutocomplete('alp', this.value)">
+                        <div class="autocomplete-list" id="alpDropdown" style="display:none;"></div>
+                    </div>
+                    <button class="manual-entry-btn" onclick="enableManualEntry('alp')" id="alpManualBtn">
+                        ✏️ Name not in list? Manual Entry
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="crew-label">DESIGNATION</td>
+                <td class="crew-val"><input type="text" id="lpdesignation" placeholder="Auto-filled"></td>
+                <td class="divider-col"></td>
+                <td class="crew-label">DESIGNATION</td>
+                <td class="crew-val"><input type="text" id="alpdesignation" placeholder="Auto-filled"></td>
+            </tr>
+            <tr>
+                <td class="crew-label">CMS ID</td>
+                <td class="crew-val"><input type="text" id="lpcmsid" placeholder="Auto-filled"></td>
+                <td class="divider-col"></td>
+                <td class="crew-label">CMS ID</td>
+                <td class="crew-val"><input type="text" id="alpcmsid" placeholder="Auto-filled"></td>
+            </tr>
+            <tr>
+                <td class="crew-label">HQ</td>
+                <td class="crew-val"><input type="text" id="lphq" placeholder="Auto-filled"></td>
+                <td class="divider-col"></td>
+                <td class="crew-label">HQ</td>
+                <td class="crew-val"><input type="text" id="alphq" placeholder="Auto-filled"></td>
+            </tr>
+            <tr>
+                <td class="crew-label">GROUP CLI NAME</td>
+                <td class="crew-val"><input type="text" id="lpgroupcliname" placeholder="Auto-filled"></td>
+                <td class="divider-col"></td>
+                <td class="crew-label">GROUP CLI NAME</td>
+                <td class="crew-val"><input type="text" id="alpgroupcliname" placeholder="Auto-filled"></td>
+            </tr>
+            <tr>
+                <td class="crew-label">FOCUSSED IP CAMERA</td>
+                <td class="crew-val"><input type="text" id="lpfocussedipcamera"></td>
+                <td class="divider-col"></td>
+                <td class="crew-label">FOCUSSED IP CAMERA</td>
+                <td class="crew-val"><input type="text" id="alpfocussedipcamera"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="full-line"></div>
+    <div class="section-heading" style="letter-spacing:4px; font-size:17px;">OBSERVATION</div>
+    <div class="full-line"></div>
+
+    <!-- OBSERVATION -->
+    <div class="obs-container">
+        <!-- CTO -->
+        <div class="section-heading spaced">C T O</div>
+        <div class="obs-row"><span class="obs-label">1. LP READ LOG BOOK</span>
+            <select id="cto1_logbook" name="cto1_logbook"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">2. LP CHECKED BPC</span>
+            <select id="cto1_bpc" name="cto1_bpc"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">3. ALP CHECKED RS VALVE</span>
+            <select id="cto2" name="cto2"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">4. ALP CHECKED MACHINE ROOM AND SAFETY ITEMS</span>
+            <select id="cto3" name="cto3"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">5. ANY ABNORMALITIES</span>
+            <select id="cto4" name="cto4"><option>NO</option><option>YES</option></select></div>
+
+        <!-- ON RUN -->
+        <div class="section-heading">ON RUN</div>
+        <div class="obs-row"><span class="obs-label">1. LP CONDUCTED BFT</span>
+            <select id="run1_bft" name="run1_bft"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">2. LP CONDUCTED BPT</span>
+            <select id="run1_bpt" name="run1_bpt"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">3. CALLING OUT OF SIGNAL WITH HAND GESTURE BY LP</span>
+            <select id="run2" name="run2"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">4. CALLING OF SIGNAL WITH HAND GESTURE BY ALP</span>
+            <select id="run3" name="run3"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">5. ALP STANDING AND HOLDING RS WHILE APPROACHING TO DANGER SIGNAL</span>
+            <select id="run4" name="run4"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">6. EXCHANGE OF SIGNAL BY LP</span>
+            <select id="run5" name="run5"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">7. EXCHANGE OF SIGNAL BY ALP</span>
+            <select id="run6" name="run6"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">8. CHECKING OF FORMATION OF TRAIN ON CURVATURE BY ALP</span>
+            <select id="run7" name="run7"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">9. ALERTNESS OF LP</span>
+            <select id="run8" name="run8"><option>Alert</option><option>Not Alert</option></select></div>
+        <div class="obs-row"><span class="obs-label">10. ALERTNESS OF ALP</span>
+            <select id="run9" name="run9"><option>Alert</option><option>Not Alert</option></select></div>
+        <div class="obs-row"><span class="obs-label">11. USE OF MOBILE BY LP / ALP</span>
+            <select id="run10" name="run10"><option>NO</option><option>YES</option></select></div>
+        <div class="obs-row"><span class="obs-label">12. ANY ABNORMALITIES OF CREW</span>
+            <select id="run11" name="run11"><option>NO</option><option>YES</option></select></div>
+
+        <!-- WHILE AT HALT -->
+        <div class="section-heading">WHILE AT HALT</div>
+        <div class="obs-row"><span class="obs-label">1. APPLICATION OF A9/SA9 BY LP</span>
+            <select id="halt1" name="halt1"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">2. REVERSER IN NEUTRAL</span>
+            <select id="halt2" name="halt2"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">3. DIMMING OF HEAD LIGHTS</span>
+            <select id="halt3" name="halt3"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">4. LP CHECKING OF UNDERGEAR AND MACHINE ROOM AT HALT</span>
+            <select id="halt4" name="halt4"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">5. ALP CHECKED MACHINE ROOM AND UNDERGEAR</span>
+            <select id="halt5" name="halt5"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">6. ANY ABNORMALITIES</span>
+            <select id="halt6" name="halt6"><option>NO</option><option>YES</option></select></div>
+
+        <!-- CHO -->
+        <div class="section-heading spaced">C H O</div>
+        <div class="obs-row"><span class="obs-label">1. LP PACKING OF PERSONNEL BELONGINGS AFTER ARRIVAL AT DESTINATION</span>
+            <select id="cho1" name="cho1"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">2. ALP PACKED PERSONNEL BELONGINGS AFTER ARRIVAL AT DESTINATION</span>
+            <select id="cho2" name="cho2"><option>Yes</option><option>No</option></select></div>
+        <div class="obs-row"><span class="obs-label">3. ANY ABNORMALITIES BY LP / ALP</span>
+            <select id="cho3" name="cho3"><option>NO</option><option>YES</option></select></div>
+
+        <!-- REMARKS -->
+        <div class="section-heading">REMARKS</div>
+        <div class="obs-row"><span class="obs-label">1. OVERALL PERFORMANCE OF LP</span>
+            <input type="text" id="lpperformance" name="lpperformance"></div>
+        <div class="obs-row"><span class="obs-label">2. OVERALL PERFORMANCE OF ALP</span>
+            <input type="text" id="alpperformance" name="alpperformance"></div>
+        <div style="padding: 6px 0;">
+            <strong>REMARKS OR ABNORMALITIES IF ANY:</strong>
+            <textarea id="remarks" name="remarks" class="remarks-area"></textarea>
+        </div>
+    </div>
+
+    <div class="full-line"></div>
+
+    <!-- LP SCREENSHOTS -->
+    <div class="img-section-title">Supporting Screenshots of LP</div>
+    <div class="img-grid">
+        <div class="img-card"><span class="img-card-label">LP Reading Logbook</span>
+            <img id="img1" alt="LP Reading logbook"><input type="file" accept="image/*" onchange="previewImg(event,1)"></div>
+        <div class="img-card"><span class="img-card-label">LP Reading BPC</span>
+            <img id="img2" alt="LP Reading BPC"><input type="file" accept="image/*" onchange="previewImg(event,2)"></div>
+        <div class="img-card"><span class="img-card-label">LP Conducting BFT</span>
+            <img id="img3" alt="LP Conducting BFT"><input type="file" accept="image/*" onchange="previewImg(event,3)"></div>
+        <div class="img-card"><span class="img-card-label">LP Conducting BPT</span>
+            <img id="img4" alt="LP Conducting BPT"><input type="file" accept="image/*" onchange="previewImg(event,4)"></div>
+        <div class="img-card"><span class="img-card-label">LP Exchanging Signal</span>
+            <img id="img5" alt="LP Exchanging signal"><input type="file" accept="image/*" onchange="previewImg(event,5)"></div>
+        <div class="img-card"><span class="img-card-label">LP Calling Out Signal with Hand Gesture</span>
+            <img id="img6" alt="LP Calling out signal"><input type="file" accept="image/*" onchange="previewImg(event,6)"></div>
+        <div class="img-card"><span class="img-card-label">LP Checking Machine Room at Halt</span>
+            <img id="img7" alt="LP Checking machine room"><input type="file" accept="image/*" onchange="previewImg(event,7)"></div>
+        <div class="img-card"><span class="img-card-label">LP Packing Personnel Belongings after Arrival</span>
+            <img id="img8" alt="LP Packing belongings"><input type="file" accept="image/*" onchange="previewImg(event,8)"></div>
+        <div class="img-card"><span class="img-card-label">SPM Data Feeding</span>
+            <img id="img9" alt="SPM Data Feeding"><input type="file" accept="image/*" onchange="previewImg(event,9)"></div>
+    </div>
+
+    <div class="full-line"></div>
+
+    <!-- ALP SCREENSHOTS -->
+    <div class="img-section-title">Supporting Screenshots of ALP</div>
+    <div class="img-grid">
+        <div class="img-card"><span class="img-card-label">ALP Checking RS while CTO</span>
+            <img id="img10" alt="ALP Checking RS"><input type="file" accept="image/*" onchange="previewImg(event,10)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Checking HTC and Safety Items</span>
+            <img id="img11" alt="ALP Checking HTC"><input type="file" accept="image/*" onchange="previewImg(event,11)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Calling Out Signal with Hand Gesture</span>
+            <img id="img12" alt="ALP Calling out signal"><input type="file" accept="image/*" onchange="previewImg(event,12)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Signal Exchange</span>
+            <img id="img13" alt="ALP Signal exchange"><input type="file" accept="image/*" onchange="previewImg(event,13)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Look Back</span>
+            <img id="img14" alt="ALP Look back"><input type="file" accept="image/*" onchange="previewImg(event,14)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Standing &amp; Holding RS Valve at Danger Signal</span>
+            <img id="img15" alt="ALP Holding RS Valve"><input type="file" accept="image/*" onchange="previewImg(event,15)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Checking Undergear at Halt</span>
+            <img id="img16" alt="ALP Checking undergear"><input type="file" accept="image/*" onchange="previewImg(event,16)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Checking Machine Room at Halt</span>
+            <img id="img17" alt="ALP Checking machine room"><input type="file" accept="image/*" onchange="previewImg(event,17)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Packing Personnel Belongings after Arrival</span>
+            <img id="img18" alt="ALP Packing belongings"><input type="file" accept="image/*" onchange="previewImg(event,18)"></div>
+    </div>
+
+</div><!-- /fullReport -->
+
+<!-- Logo upload -->
+<div style="max-width:900px; margin:10px auto 0; display:flex; align-items:center; gap:12px;
+            background:#003366; color:#fff; padding:10px 16px; border-radius:6px; position:relative; z-index:5;">
+    <strong style="white-space:nowrap;">📷 Load Rail Logo (rail.jpeg):</strong>
+    <input type="file" id="logoUpload" accept="image/*" onchange="loadLogo(event)"
+           style="color:#fff; font-size:13px; flex:1;">
+    <span style="font-size:12px; color:#c8dff5;">Appears on both sides of the heading</span>
+</div>
+
+<!-- Reload Crew button -->
+<button class="btn-reload-crew" type="button" onclick="loadCrewData()">
+    🔄 Reload Crew Data from Google Sheet
+</button>
+
+<!-- Submit to Google Sheets -->
+<button class="btn-submit-gs" type="button" onclick="submitToGoogleSheets()">
+    📊 SUBMIT DATA
+</button>
+
+<!-- Generate PDF -->
+<button class="btn-generate" type="button" onclick="generatePDF()">
+    🖨️ Generate PDF
+</button>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+/* ================================================================
+   CONFIGURATION
+   ================================================================ */
+// Google Sheet ID for crew data (publicly readable)
+const CREW_SHEET_ID  = "19KRFgB1-laDbrM6dJ9myxBJIG01FrjOApNFSAlb4oSE";
+// Sheet name / GID (default first sheet, gid=0)
+const CREW_SHEET_GID = "0";
+
+// Google Apps Script URL for submitting report data
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzbkJaifRMLiySAYahEV8_nNQ1bCA23muo_ZfaaT6g5Rkyn6hOZAKE328bNqMSXLkNC/exec";
+
+/* ================================================================
+   CREW DATA - loaded from Google Sheet
+   ================================================================
+   Sheet columns: CREWID | CREW NAME | DESG | CLI NAME | CUG NUMBER
+   HQ is derived from the CREWID prefix (letters before the digits)
+   ================================================================ */
+let crewList = [];          // array of crew objects
+let crewLoaded = false;
+
+/**
+ * Extract HQ abbreviation from CREWID prefix.
+ * Examples: AKT1001 → AKT, BSP1002 → BSP, BJRI1016 → BJRI
+ */
+function hqFromId(crewId) {
+    const match = (crewId || "").match(/^([A-Za-z]+)/);
+    return match ? match[1].toUpperCase() : "";
+}
+
+/**
+ * Parse CSV text into array of objects using header row.
+ */
+function parseCSV(text) {
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) return [];
+
+    // Parse a single CSV line, handling quoted fields
+    function parseLine(line) {
+        const result = [];
+        let cur = "", inQuote = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
+                else inQuote = !inQuote;
+            } else if (ch === ',' && !inQuote) {
+                result.push(cur.trim()); cur = "";
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur.trim());
+        return result;
+    }
+
+    const headers = parseLine(lines[0]).map(h => h.toUpperCase());
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = parseLine(lines[i]);
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = vals[idx] || ""; });
+        rows.push(obj);
+    }
+    return rows;
+}
+
+/**
+ * Fetch crew data CSV from Google Sheets public export URL.
+ * Falls back to a CORS proxy if direct fetch fails.
+ */
+async function loadCrewData() {
+    updateCrewBadge("loading", "Loading crew data...");
+    crewLoaded = false;
+    crewList   = [];
+
+    const directUrl = `https://docs.google.com/spreadsheets/d/${CREW_SHEET_ID}/export?format=csv&gid=${CREW_SHEET_GID}`;
+    const proxyUrl  = `https://corsproxy.io/?${encodeURIComponent(directUrl)}`;
+
+    let text = null;
+
+    // Try direct fetch first
+    try {
+        const res = await fetch(directUrl, { redirect: "follow" });
+        if (res.ok) text = await res.text();
+    } catch(e) { /* CORS blocked, will try proxy */ }
+
+    // Try proxy if direct failed
+    if (!text) {
+        try {
+            const res = await fetch(proxyUrl);
+            if (res.ok) text = await res.text();
+        } catch(e) { /* proxy also failed */ }
+    }
+
+    if (!text) {
+        updateCrewBadge("error", "Failed to load crew data");
+        showToast("❌ Could not load crew data. Check network or sheet permissions.", true);
+        return;
+    }
+
+    // Parse CSV
+    const rows = parseCSV(text);
+    crewList = rows
+        .filter(r => r["CREW NAME"] && r["CREW NAME"].trim())
+        .map(r => ({
+            name    : r["CREW NAME"].trim().toUpperCase(),
+            desg    : r["DESG"]       ? r["DESG"].trim()      : "",
+            crewId  : r["CREWID"]     ? r["CREWID"].trim()    : "",
+            cliName : r["CLI NAME"]   ? r["CLI NAME"].trim()  : "",
+            cug     : r["CUG NUMBER"] ? r["CUG NUMBER"].trim(): "",
+            hq      : hqFromId(r["CREWID"] || "")
+        }));
+
+    crewLoaded = true;
+    updateCrewBadge("success", `✓ ${crewList.length} crew loaded`);
+    showToast(`✅ Crew data loaded: ${crewList.length} records`, false);
+}
+
+function updateCrewBadge(state, text) {
+    const badge = document.getElementById("crewStatusBadge");
+    const span  = document.getElementById("crewStatusText");
+    badge.className = "crew-status-badge " + state;
+    span.textContent = text;
+    // stop pulsing dot on success/error
+    const dot = badge.querySelector(".badge-dot");
+    if (dot) {
+        dot.style.animation = (state === "loading") ? "" : "none";
+    }
+}
+
+/* ================================================================
+   AUTOCOMPLETE
+   ================================================================ */
+function handleAutocomplete(prefix, query) {
+    const dropdown = document.getElementById(prefix + "Dropdown");
+
+    if (!crewLoaded) {
+        dropdown.innerHTML = `<div class="ac-empty">⏳ Crew data still loading…</div>`;
+        dropdown.style.display = "block";
+        return;
+    }
+
+    const q = query.trim().toUpperCase();
+    if (!q) { dropdown.style.display = "none"; return; }
+
+    // Search by name OR crewId
+    const matches = crewList.filter(c =>
+        c.name.includes(q) || c.crewId.toUpperCase().includes(q)
+    ).slice(0, 12);
+
+    if (!matches.length) {
+        dropdown.innerHTML = `<div class="ac-empty">No results for "${query}"</div>`;
+        dropdown.style.display = "block";
+        return;
+    }
+
+    dropdown.innerHTML = matches.map((c, i) => {
+        // Highlight matched part in name
+        const highlighted = c.name.replace(new RegExp(q, "gi"), m => `<mark style="background:#fff3cd;">${m}</mark>`);
+        return `<div class="ac-item" data-idx="${i}" onclick="selectCrewItem('${prefix}', ${crewList.indexOf(c)})">
+            <span class="ac-name">${highlighted}</span>
+            <span class="ac-meta">${c.desg} | ${c.hq} | ${c.crewId}</span>
+        </div>`;
+    }).join("");
+
+    dropdown.style.display = "block";
+}
+
+function selectCrewItem(prefix, idx) {
+    const c = crewList[idx];
+    if (!c) return;
+
+    document.getElementById(prefix + "name").value         = c.name;
+    document.getElementById(prefix + "designation").value  = c.desg;
+    document.getElementById(prefix + "cmsid").value        = c.crewId;
+    document.getElementById(prefix + "hq").value           = c.hq;
+    document.getElementById(prefix + "groupcliname").value = c.cliName;
+
+    // Lock auto-filled fields
+    ["designation","cmsid","hq","groupcliname"].forEach(f => {
+        const el = document.getElementById(prefix + f);
+        if (el) { el.readOnly = true; el.style.opacity = "0.75"; el.style.cursor = "not-allowed"; }
+    });
+
+    document.getElementById(prefix + "Dropdown").style.display = "none";
+    document.getElementById(prefix + "ManualBtn").style.display = "none";
+}
+
+function enableManualEntry(prefix) {
+    const input = document.getElementById(prefix + "name");
+    input.value = ""; input.readOnly = false;
+    input.placeholder = "Enter name manually...";
+    unlockCrewFields(prefix);
+    document.getElementById(prefix + "Dropdown").style.display = "none";
+    const btn = document.getElementById(prefix + "ManualBtn");
+    btn.textContent = "🔍 Switch back to list search";
+    btn.onclick = () => resetCrewEntry(prefix);
+}
+
+function resetCrewEntry(prefix) {
+    const input = document.getElementById(prefix + "name");
+    input.value = ""; input.readOnly = false;
+    input.placeholder = "Type " + prefix.toUpperCase() + " name or ID...";
+    unlockCrewFields(prefix);
+    const btn = document.getElementById(prefix + "ManualBtn");
+    btn.textContent = "✏️ Name not in list? Manual Entry";
+    btn.onclick = () => enableManualEntry(prefix);
+}
+
+function unlockCrewFields(prefix) {
+    ["designation","cmsid","hq","groupcliname"].forEach(f => {
+        const el = document.getElementById(prefix + f);
+        if (el) { el.readOnly = false; el.style.opacity = ""; el.style.cursor = ""; el.value = ""; }
+    });
+}
+
+// Close dropdown on outside click
+document.addEventListener("click", e => {
+    ["lp","alp"].forEach(p => {
+        const dd = document.getElementById(p + "Dropdown");
+        const wr = document.getElementById(p + "NameWrapper");
+        if (dd && wr && !wr.contains(e.target)) dd.style.display = "none";
+    });
+});
+
+/* ================================================================
+   DARK MODE
+   ================================================================ */
+function toggleDarkMode() {
+    const body = document.body;
+    const btn  = document.getElementById("darkBtn");
+    if (body.classList.contains("light-mode")) {
+        body.classList.replace("light-mode", "dark-mode");
+        btn.innerHTML = '<span class="toggle-moon">☀️</span> Light Mode';
+    } else {
+        body.classList.replace("dark-mode", "light-mode");
+        btn.innerHTML = '<span class="toggle-moon">🌙</span> Dark Mode';
+    }
+}
+
+/* ================================================================
+   PARTICLE ANIMATION
+   ================================================================ */
+(function() {
+    const canvas = document.getElementById("particleCanvas");
+    const ctx    = canvas.getContext("2d");
+    let W, H, particles = [];
+
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function createParticle() {
+        return {
+            x: Math.random() * W, y: Math.random() * H,
+            r: Math.random() * 2.2 + 0.4,
+            dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.5,
+            alpha: Math.random() * 0.6 + 0.1,
+            hue: Math.random() * 60 + 180
+        };
+    }
+    for (let i = 0; i < 120; i++) particles.push(createParticle());
+
+    function drawLines() {
+        const isDark = document.body.classList.contains("dark-mode");
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 100) {
+                    ctx.strokeStyle = isDark
+                        ? `rgba(100,160,255,${0.15*(1-dist/100)})`
+                        : `rgba(0,80,60,${0.12*(1-dist/100)})`;
+                    ctx.lineWidth = 0.6;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, W, H);
+        const isDark = document.body.classList.contains("dark-mode");
+        particles.forEach(p => {
+            p.x += p.dx; p.y += p.dy;
+            if (p.x < 0 || p.x > W) p.dx *= -1;
+            if (p.y < 0 || p.y > H) p.dy *= -1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = isDark
+                ? `hsla(${p.hue},80%,70%,${p.alpha})`
+                : `hsla(${p.hue},60%,30%,${p.alpha * 0.7})`;
+            ctx.fill();
+        });
+        drawLines();
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+
+/* ================================================================
+   LOGO LOADER
+   ================================================================ */
+function loadLogo(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const src = e.target.result;
+        ["logoLeft","logoRight"].forEach(id => {
+            const img = document.getElementById(id);
+            img.src = src; img.style.display = "block";
+        });
+        document.getElementById("logoLeftPlaceholder").style.display  = "none";
+        document.getElementById("logoRightPlaceholder").style.display = "none";
+    };
+    reader.readAsDataURL(file);
+}
+
+/* ================================================================
+   IMAGE PREVIEW
+   ================================================================ */
+function previewImg(event, id) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const img = document.getElementById("img" + id);
+    img.src = URL.createObjectURL(file);
+    img.style.display = "block";
+}
+
+/* ================================================================
+   TOAST / LOADING
+   ================================================================ */
+function showToast(msg, isError) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast" + (isError ? " error" : "") + " show";
+    setTimeout(() => { t.className = "toast" + (isError ? " error" : ""); }, 4000);
+}
+function showLoading(msg) {
+    document.getElementById("loadingMsg").textContent = msg || "Processing...";
+    document.getElementById("loadingOverlay").classList.add("active");
+}
+function hideLoading() {
+    document.getElementById("loadingOverlay").classList.remove("active");
+}
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function getVal(id) {
+    const el = document.getElementById(id);
+    if (!el) return "";
+    if (el.tagName === "SELECT") return el.options[el.selectedIndex]?.text || "";
+    return el.value || "";
+}
+
+/* ================================================================
+   GOOGLE SHEETS SUBMIT
+   ================================================================ */
+async function submitToGoogleSheets() {
+    const data = {
+        "Timestamp":              new Date().toLocaleString(),
+        "Analysed By":            getVal("analysedby"),
+        "Month":                  getVal("month"),
+        "Count":                  getVal("count"),
+        "Loco No":                getVal("locoNo"),
+        "SHED":                   getVal("Shed"),
+        "Leading Cab":            getVal("leadingCab"),
+        "Train No":               getVal("trainno"),
+        "Analysis From":          getVal("analysisfrom"),
+        "Analysis Up To":         getVal("analysisupto"),
+        "Section":                getVal("section"),
+        "From Station":           getVal("fromstation"),
+        "To Station":             getVal("tostation"),
+        "Working Date":           getVal("workingdate"),
+        "Departure Time":         getVal("departuretime"),
+        "Arrival Time":           getVal("arrivaltime"),
+        "Analysis Date":          getVal("analysisdate"),
+        "Load":                   getVal("Load"),
+        "CVVRS Make":             getVal("cvvrsmake"),
+        // LP
+        "LP Name":                getVal("lpname"),
+        "LP Designation":         getVal("lpdesignation"),
+        "LP CMS ID":              getVal("lpcmsid"),
+        "LP HQ":                  getVal("lphq"),
+        "LP Group CLI":           getVal("lpgroupcliname"),
+        "LP IP Camera":           getVal("lpfocussedipcamera"),
+        // ALP
+        "ALP Name":               getVal("alpname"),
+        "ALP Designation":        getVal("alpdesignation"),
+        "ALP CMS ID":             getVal("alpcmsid"),
+        "ALP HQ":                 getVal("alphq"),
+        "ALP Group CLI":          getVal("alpgroupcliname"),
+        "ALP IP Camera":          getVal("alpfocussedipcamera"),
+        // CTO
+        "CTO - LP Read Log Book":                    getVal("cto1_logbook"),
+        "CTO - LP Checked BPC":                      getVal("cto1_bpc"),
+        "CTO - ALP Checked RS Valve":                getVal("cto2"),
+        "CTO - ALP Checked Machine Room":            getVal("cto3"),
+        "CTO - Any Abnormalities":                   getVal("cto4"),
+        // ON RUN
+        "Run - LP Conducted BFT":                    getVal("run1_bft"),
+        "Run - LP Conducted BPT":                    getVal("run1_bpt"),
+        "Run - LP Calling Signal Gesture":           getVal("run2"),
+        "Run - ALP Calling Signal Gesture":          getVal("run3"),
+        "Run - ALP Standing RS at Danger":           getVal("run4"),
+        "Run - Exchange Signal LP":                  getVal("run5"),
+        "Run - Exchange Signal ALP":                 getVal("run6"),
+        "Run - ALP Checking Formation Curvature":    getVal("run7"),
+        "Run - Alertness LP":                        getVal("run8"),
+        "Run - Alertness ALP":                       getVal("run9"),
+        "Run - Mobile Use LP/ALP":                   getVal("run10"),
+        "Run - Any Abnormalities":                   getVal("run11"),
+        // HALT
+        "Halt - A9/SA9 Application LP":              getVal("halt1"),
+        "Halt - Reverser Neutral":                   getVal("halt2"),
+        "Halt - Head Light Dimming":                 getVal("halt3"),
+        "Halt - LP Undergear Machine Room Check":    getVal("halt4"),
+        "Halt - ALP Machine Room Undergear Check":   getVal("halt5"),
+        "Halt - Any Abnormalities":                  getVal("halt6"),
+        // CHO
+        "CHO - LP Packing Belongings":               getVal("cho1"),
+        "CHO - ALP Packing Belongings":              getVal("cho2"),
+        "CHO - Any Abnormalities":                   getVal("cho3"),
+        // Remarks
+        "LP Performance":                            getVal("lpperformance"),
+        "ALP Performance":                           getVal("alpperformance"),
+        "Remarks":                                   getVal("remarks")
+    };
+
+    showLoading("Submitting data to Google Sheets...");
+    try {
+        await fetch(GOOGLE_SHEET_URL, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        hideLoading();
+        showToast("✅ Data submitted successfully!", false);
+    } catch (err) {
+        hideLoading();
+        showToast("❌ Submission failed: " + err.message, true);
+    }
+}
+
+/* ================================================================
+   PDF GENERATION
+   ================================================================ */
+async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const element   = document.getElementById("fullReport");
+
+    document.querySelectorAll(".autocomplete-list").forEach(d => d.style.display = "none");
+
+    const controls = element.querySelectorAll("input[type='text'], textarea, select");
+    controls.forEach(ctrl => {
+        let val = (ctrl.tagName === "SELECT")
+            ? (ctrl.options[ctrl.selectedIndex]?.text || "")
+            : ctrl.value;
+        const span = document.createElement("span");
+        span.className = "print-value";
+        span.textContent = val || "\u00a0";
+        ctrl.style.display = "none";
+        ctrl.parentNode.insertBefore(span, ctrl.nextSibling);
+        span.style.display = "inline";
+    });
+
+    const fileInputs = element.querySelectorAll("input[type='file']");
+    const manualBtns = element.querySelectorAll(".manual-entry-btn");
+    fileInputs.forEach(fi => fi.style.display = "none");
+    manualBtns.forEach(b  => b.style.display  = "none");
+
+    try {
+        showLoading("Generating PDF...");
+        const canvas = await html2canvas(element, {
+            scale: 2, useCORS: true, allowTaint: true,
+            scrollY: -window.scrollY,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+        });
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const pdf     = new jsPDF("p", "mm", "a4");
+        const pageW   = pdf.internal.pageSize.getWidth();
+        const pageH   = pdf.internal.pageSize.getHeight();
+        const imgW    = pageW;
+        const imgH    = canvas.height * imgW / canvas.width;
+        let remaining = imgH, offset = 0;
+
+        pdf.addImage(imgData, "JPEG", 0, -offset, imgW, imgH);
+        remaining -= pageH; offset += pageH;
+        while (remaining > 0) {
+            pdf.addPage();
+            pdf.addImage(imgData, "JPEG", 0, -offset, imgW, imgH);
+            remaining -= pageH; offset += pageH;
+        }
+        hideLoading();
+        pdf.save("CVVRS_Report_A4.pdf");
+    } catch (err) {
+        hideLoading();
+        alert("PDF generation failed: " + err.message);
+    } finally {
+        controls.forEach(ctrl => {
+            ctrl.style.display = "";
+            const next = ctrl.nextSibling;
+            if (next && next.classList && next.classList.contains("print-value")) next.remove();
+        });
+        fileInputs.forEach(fi => fi.style.display = "");
+        manualBtns.forEach(b  => b.style.display  = "");
+    }
+}
+
+/* ================================================================
+   INIT — load crew data on page load
+   ================================================================ */
+window.addEventListener("DOMContentLoaded", () => {
+    loadCrewData();
+});
+</script>
+</body>
+</html>
