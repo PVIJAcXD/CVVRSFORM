@@ -1,4 +1,7 @@
 
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,7 +53,7 @@
 
         /* ===== TOP BAR ===== */
         .top-bar {
-            max-width: 900px; margin: 0 auto 12px;
+            max-width: 1200px; margin: 0 auto 12px;
             display: flex; justify-content: space-between; align-items: center;
             gap: 10px; position: relative; z-index: 10;
         }
@@ -85,7 +88,7 @@
 
         /* ===== REPORT WRAPPER ===== */
         #fullReport {
-            background: #fff; width: 100%; max-width: 900px;
+            background: #fff; width: 100%; max-width: 1200px;
             margin: 0 auto; padding: 20px 24px 30px;
             border: 2px solid #073f3f; position: relative; z-index: 5;
             transition: background 0.4s, color 0.4s, border-color 0.4s;
@@ -223,6 +226,8 @@
             resize: vertical; margin-top: 6px; transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
         body.dark-mode .remarks-area { background: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        .remarks-area.error { border-color: #cc2200; border-width: 2px; background: #ffe6e6; }
+        body.dark-mode .remarks-area.error { border-color: #f66; background: #3a1a1a; }
 
         /* ===== IMAGE GRID ===== */
         .img-section-title {
@@ -251,21 +256,21 @@
         .btn-generate {
             display: block; margin: 18px auto; padding: 11px 36px; font-size: 16px;
             background-color: #003366; color: #fff; border: none; border-radius: 6px;
-            cursor: pointer; max-width: 900px; width: 100%;
+            cursor: pointer; max-width: 1200px; width: 100%;
             transition: background 0.3s, transform 0.2s; position: relative; z-index: 5;
         }
         .btn-generate:hover { background-color: #005599; transform: scale(1.01); }
         .btn-submit-gs {
             display: block; margin: 8px auto; padding: 11px 36px; font-size: 16px;
             background-color: #1a7a1a; color: #fff; border: none; border-radius: 6px;
-            cursor: pointer; max-width: 900px; width: 100%;
+            cursor: pointer; max-width: 1200px; width: 100%;
             transition: background 0.3s, transform 0.2s; position: relative; z-index: 5;
         }
         .btn-submit-gs:hover { background-color: #228b22; transform: scale(1.01); }
         .btn-reload-crew {
             display: block; margin: 8px auto; padding: 9px 36px; font-size: 14px;
             background-color: #7b3f00; color: #fff; border: none; border-radius: 6px;
-            cursor: pointer; max-width: 900px; width: 100%;
+            cursor: pointer; max-width: 1200px; width: 100%;
             transition: background 0.3s, transform 0.2s; position: relative; z-index: 5;
         }
         .btn-reload-crew:hover { background-color: #a05000; transform: scale(1.01); }
@@ -302,7 +307,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="light-mode">
+<body class="dark-mode">
 
 <canvas class="particles-canvas" id="particleCanvas"></canvas>
 <div class="loading-overlay" id="loadingOverlay">
@@ -320,7 +325,7 @@
         <span id="crewStatusText">Loading crew data...</span>
     </div>
     <button class="dark-toggle-btn" onclick="toggleDarkMode()" id="darkBtn">
-        <span class="toggle-moon">🌙</span> Dark Mode
+        <span class="toggle-moon">☀️</span> Light Mode
     </button>
 </div>
 
@@ -555,8 +560,8 @@
         <div class="obs-row"><span class="obs-label">2. OVERALL PERFORMANCE OF ALP</span>
             <input type="text" id="alpperformance" name="alpperformance"></div>
         <div style="padding: 6px 0;">
-            <strong>REMARKS OR ABNORMALITIES IF ANY:</strong>
-            <textarea id="remarks" name="remarks" class="remarks-area"></textarea>
+            <strong>REMARKS OR ABNORMALITIES IF ANY: <span style="color: #cc2200; font-weight: bold;">*</span></strong>
+            <textarea id="remarks" name="remarks" class="remarks-area" required></textarea>
         </div>
     </div>
 
@@ -613,12 +618,21 @@
 </div><!-- /fullReport -->
 
 <!-- Logo upload -->
-<div style="max-width:900px; margin:10px auto 0; display:flex; align-items:center; gap:12px;
+<div style="max-width:1200px; margin:10px auto 0; display:flex; align-items:center; gap:12px;
             background:#003366; color:#fff; padding:10px 16px; border-radius:6px; position:relative; z-index:5;">
     <strong style="white-space:nowrap;">📷 Load Rail Logo (rail.jpeg):</strong>
     <input type="file" id="logoUpload" accept="image/*" onchange="loadLogo(event)"
            style="color:#fff; font-size:13px; flex:1;">
     <span style="font-size:12px; color:#c8dff5;">Appears on both sides of the heading</span>
+</div>
+
+<!-- Crew Data Excel Upload -->
+<div style="max-width:1200px; margin:10px auto 0; display:flex; align-items:center; gap:12px;
+            background:#1a7a1a; color:#fff; padding:10px 16px; border-radius:6px; position:relative; z-index:5;">
+    <strong style="white-space:nowrap;">📊 Replace Crew Data (Excel/CSV):</strong>
+    <input type="file" id="crewDataUpload" accept=".xlsx,.xls,.csv" onchange="handleCrewDataUpload(event)"
+           style="color:#fff; font-size:13px; flex:1;">
+    <span style="font-size:12px; color:#c8dff5;">Upload Excel or CSV file to replace crew data</span>
 </div>
 
 <!-- Reload Crew button -->
@@ -1003,9 +1017,49 @@ function getVal(id) {
 }
 
 /* ================================================================
+   FORM SUBMISSION TRACKING
+   ================================================================ */
+let formSubmitted = false;
+
+/* ================================================================
+   REMARKS VALIDATION
+   ================================================================ */
+function validateRemarks() {
+    const remarksField = document.getElementById("remarks");
+    const remarksValue = remarksField.value.trim();
+
+    if (!remarksValue) {
+        remarksField.classList.add("error");
+        alert("⚠️ FILL REMARKS BOX\n\nPlease fill the 'REMARKS OR ABNORMALITIES IF ANY' field before submitting or generating PDF.");
+        remarksField.focus();
+        return false;
+    }
+
+    remarksField.classList.remove("error");
+    return true;
+}
+
+// Remove error styling when user starts typing
+document.addEventListener("DOMContentLoaded", () => {
+    const remarksField = document.getElementById("remarks");
+    if (remarksField) {
+        remarksField.addEventListener("input", function() {
+            if (this.value.trim()) {
+                this.classList.remove("error");
+            }
+        });
+    }
+});
+
+/* ================================================================
    GOOGLE SHEETS SUBMIT
    ================================================================ */
 async function submitToGoogleSheets() {
+    // Validate remarks field first
+    if (!validateRemarks()) {
+        return;
+    }
+
     const data = {
         "Timestamp":              new Date().toLocaleString(),
         "Analysed By":            getVal("analysedby"),
@@ -1084,6 +1138,7 @@ async function submitToGoogleSheets() {
             body: JSON.stringify(data)
         });
         hideLoading();
+        formSubmitted = true; // Mark form as submitted
         showToast("✅ Data submitted successfully!", false);
     } catch (err) {
         hideLoading();
@@ -1095,6 +1150,17 @@ async function submitToGoogleSheets() {
    PDF GENERATION
    ================================================================ */
 async function generatePDF() {
+    // Validate remarks field first
+    if (!validateRemarks()) {
+        return;
+    }
+
+    // Check if form has been submitted
+    if (!formSubmitted) {
+        alert("⚠️ FIRST SUBMIT FORM\n\nPlease submit the form data before generating the PDF.");
+        return;
+    }
+
     const { jsPDF } = window.jspdf;
     const element   = document.getElementById("fullReport");
 
@@ -1155,6 +1221,58 @@ async function generatePDF() {
         fileInputs.forEach(fi => fi.style.display = "");
         manualBtns.forEach(b  => b.style.display  = "");
     }
+}
+
+/* ================================================================
+   CREW DATA FILE UPLOAD (Excel/CSV)
+   ================================================================ */
+async function handleCrewDataUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    updateCrewBadge("loading", "Processing uploaded file...");
+
+    try {
+        // Check if it's CSV or Excel
+        if (file.name.endsWith('.csv')) {
+            // Handle CSV
+            const text = await file.text();
+            const rows = parseCSV(text);
+            processUploadedCrewData(rows);
+        } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            // Handle Excel - need XLSX library
+            showToast("⚠️ Excel files require XLSX library. Please convert to CSV or use Google Sheets.", true);
+            updateCrewBadge("error", "Please use CSV format");
+            event.target.value = ""; // Reset input
+            return;
+        } else {
+            showToast("❌ Unsupported file format. Please use CSV.", true);
+            updateCrewBadge("error", "Unsupported format");
+            event.target.value = "";
+            return;
+        }
+    } catch (err) {
+        showToast("❌ Error reading file: " + err.message, true);
+        updateCrewBadge("error", "File read error");
+        event.target.value = "";
+    }
+}
+
+function processUploadedCrewData(rows) {
+    crewList = rows
+        .filter(r => r["CREW NAME"] && r["CREW NAME"].trim())
+        .map(r => ({
+            name    : r["CREW NAME"].trim().toUpperCase(),
+            desg    : r["DESG"]       ? r["DESG"].trim()      : "",
+            crewId  : r["CREWID"]     ? r["CREWID"].trim()    : "",
+            cliName : r["CLI NAME"]   ? r["CLI NAME"].trim()  : "",
+            cug     : r["CUG NUMBER"] ? r["CUG NUMBER"].trim(): "",
+            hq      : hqFromId(r["CREWID"] || "")
+        }));
+
+    crewLoaded = true;
+    updateCrewBadge("success", `✓ ${crewList.length} crew loaded from file`);
+    showToast(`✅ Crew data loaded from file: ${crewList.length} records`, false);
 }
 
 /* ================================================================
