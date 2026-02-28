@@ -2,6 +2,11 @@
 
 
 
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -123,19 +128,36 @@
         body.dark-mode .info-table .field-label { color: #a0c4ff; }
         .info-table .field-value { width: 170px; }
         .info-table input[type="text"],
-        .info-table input[type="date"] {
+        .info-table input[type="date"],
+        .info-table select {
             width: 100%; height: 24px; padding: 3px 6px; font-size: 13px;
             background-color: #d6dde1; border: 1px solid #888; border-radius: 3px;
             transition: background 0.3s, color 0.3s, border-color 0.3s;
+            color: #fff;
+            font-weight: bold;
+        }
+        .info-table input[type="text"]::placeholder,
+        .info-table input[type="date"]::placeholder,
+        .info-table select::placeholder {
+            color: #fff;
+            opacity: 0.8;
         }
         body.dark-mode .info-table input[type="text"],
-        body.dark-mode .info-table input[type="date"] { background-color: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        body.dark-mode .info-table input[type="date"],
+        body.dark-mode .info-table select { background-color: #2a2a4a; color: #fff; border-color: #4a90d9; }
+        body.dark-mode .info-table input[type="text"]::placeholder,
+        body.dark-mode .info-table input[type="date"]::placeholder,
+        body.dark-mode .info-table select::placeholder {
+            color: #fff;
+            opacity: 0.7;
+        }
 
         /* ===== SECTION HEADING ===== */
         .section-heading {
             background-color: #003366; color: #fff; text-align: center;
             font-size: 15px; font-weight: bold; padding: 6px 0;
             margin: 12px 0 8px; letter-spacing: 2px; transition: background 0.4s;
+            font-weight: bold;
         }
         body.dark-mode .section-heading { background-color: #1a3a6e; border: 1px solid #4a90d9; }
         .section-heading.spaced { letter-spacing: 14px; }
@@ -159,8 +181,18 @@
             width: 100%; height: 24px; padding: 3px 6px; font-size: 13px;
             background-color: #d6dde1; border: 1px solid #888; border-radius: 3px;
             transition: background 0.3s, color 0.3s, border-color 0.3s;
+            color: #fff;
+            font-weight: bold;
         }
-        body.dark-mode .crew-table input[type="text"] { background-color: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        .crew-table input[type="text"]::placeholder {
+            color: #fff;
+            opacity: 0.8;
+        }
+        body.dark-mode .crew-table input[type="text"] { background-color: #2a2a4a; color: #fff; border-color: #4a90d9; }
+        body.dark-mode .crew-table input[type="text"]::placeholder {
+            color: #fff;
+            opacity: 0.7;
+        }
 
         /* ===== AUTOCOMPLETE ===== */
         .autocomplete-wrapper { position: relative; width: 100%; }
@@ -212,20 +244,44 @@
             width: 100px; padding: 4px; font-size: 13px;
             border: 1px solid #888; border-radius: 3px; background: #d6dde1; flex-shrink: 0;
             transition: background 0.3s, color 0.3s, border-color 0.3s;
+            color: #fff;
+            font-weight: bold;
         }
-        body.dark-mode .obs-row select { background: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        body.dark-mode .obs-row select { background: #2a2a4a; color: #fff; border-color: #4a90d9; }
+        .obs-row select.changed { background: #ff4444 !important; }
+        body.dark-mode .obs-row select.changed { background: #cc0000 !important; }
         .obs-row input[type="text"] {
             width: 200px; height: 26px; padding: 3px 6px; font-size: 13px;
             background-color: #d6dde1; border: 1px solid #888; border-radius: 3px; flex-shrink: 0;
             transition: background 0.3s, color 0.3s, border-color 0.3s;
+            color: #fff;
+            font-weight: bold;
         }
-        body.dark-mode .obs-row input[type="text"] { background-color: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        .obs-row input[type="text"]::placeholder {
+            color: #fff;
+            opacity: 0.8;
+        }
+        body.dark-mode .obs-row input[type="text"] { background-color: #2a2a4a; color: #fff; border-color: #4a90d9; }
+        body.dark-mode .obs-row input[type="text"]::placeholder {
+            color: #fff;
+            opacity: 0.7;
+        }
         .remarks-area {
             width: 100%; height: 80px; padding: 6px; font-size: 13px;
             border: 1px solid #888; border-radius: 3px; background: #d6dde1;
             resize: vertical; margin-top: 6px; transition: background 0.3s, color 0.3s, border-color 0.3s;
+            color: #fff;
+            font-weight: bold;
         }
-        body.dark-mode .remarks-area { background: #2a2a4a; color: #e0e0e0; border-color: #4a90d9; }
+        .remarks-area::placeholder {
+            color: #fff;
+            opacity: 0.8;
+        }
+        body.dark-mode .remarks-area { background: #2a2a4a; color: #fff; border-color: #4a90d9; }
+        body.dark-mode .remarks-area::placeholder {
+            color: #fff;
+            opacity: 0.7;
+        }
         .remarks-area.error { border-color: #cc2200; border-width: 2px; background: #ffe6e6; }
         body.dark-mode .remarks-area.error { border-color: #f66; background: #3a1a1a; }
 
@@ -355,9 +411,152 @@
     <table class="info-table">
         <tr>
             <td class="field-label">Analysed By:</td>
-            <td class="field-value"><input type="text" id="analysedby" name="analysedby"></td>
+            <td class="field-value">
+                <select id="analysedby" name="analysedby">
+                    <option value="">-- Select --</option>
+                     <option value="  A K REDDY (R0071)">  A K REDDY (R0071)</option>
+                       <option value="  A P SHRIVASTAV ">
+ A P SHRIVASTAV /BIA</option>
+                     <option value="  A.R.TARAM ( R0038)">  A.R.TARAM ( R0038)</option>
+                           <option value=" ABDUL MOIN KHAN ( R0022)">  ABDUL MOIN KHAN ( R0022)</option>
+                             <option value="  AKHILESH KUMAR ( R0064)">  AKHILESH KUMAR ( R0064)</option>
+                               <option value="  AMIT KUMAR BANKURE ( R0105)">  AMIT KUMAR BANKURE ( R0105)</option>
+                                 <option value=" ANKIT RAM KANT ( R0096)
+">  ANKIT RAM KANT ( R0096)</option>
+                                   <option value="  ASHISH WANJARI ( R0106)"> ASHISH WANJARI ( R0106)
+</option>
+                                     <option value="  AVON KUMAR SAHU ( R0078)
+">  AVON KUMAR SAHU ( R0078)</option>
+                                       <option value=" B B KUSHWAHA ( R0079)
+">  B B KUSHWAHA ( R0079)</option>
+                                         <option value=" B K HARMUKH ( R0087)
+">  B K HARMUKH ( R0087)</option>
+                                           <option value="  B. K. SAHA ( R0007)
+">  B. K. SAHA ( R0007)</option>
+                                             <option value=" B.K.SONI ( R0035)
+">  B.K.SONI ( R0035)</option>
+                                    
+                     <option value="  BHARAT SINGH ATBHAIYYA ( R0075)
+">  BHARAT SINGH ATBHAIYYA ( R0075)</option>
+                       <option value="  BINOD KUMAR RAM ( R0057)
+">BINOD KUMAR RAM ( R0057)</option>
+                         <option value="  DEEPANNITA PUNTAMBEKAR ( R0059)
+">  DEEPANNITA PUNTAMBEKAR ( R0059)</option>
+                          
+                             <option value="  DILLI RAO ( R0102)
+">  DILLI RAO ( R0102)</option>
+                               <option value="  G. C. BISWAS ( R0047)
+">  G. C. BISWAS ( R0047)</option>
+                                 <option value="  G. V. R. K. MADHU ( R0010)
+">  G. V. R. K. MADHU ( R0010)</option>
+                                   <option value=" GIRDHARI LAL ( R0077)
+">  GIRDHARI LAL ( R0077)</option>
+                                     <option value="  JAISHANKAR SHARMA ( R0092)
+">  JAISHANKAR SHARMA ( R0092)</option>
+                                       <option value="  JITENDRA KUMAR MISHRA ( R0104)
+">  JITENDRA KUMAR MISHRA ( R0104)</option>
+                                         <option value="  K P LAHARE ( R0089)
+">  K P LAHARE ( R0089)</option>
+                                           <option value="K. K. SAHU ( R0043)
+">  K. K. SAHU ( R0043)</option>
+                                             <option value="  K P HIRWANI ( R0108)
+"> K P HIRWANI ( R0108)</option>
+                     <option value="  KHUSHAL SINGH ( R0042)
+">  KHUSHAL SINGH ( R0042)</option>
+                       <option value="  MAHESHWAR ( R0099)
+">  MAHESHWAR ( R0099)</option>
+                         <option value="  MANOJ KUMAR SAO ( R0084)
+">  MANOJ KUMAR SAO ( R0084)</option>
+                           <option value=" M L CHANDRAKAR ( R0063)
+">  M L CHANDRAKAR ( R0063)</option>
+                             <option value="  MOHIT KUMAR SWARNKAR ( R0076)
+">  MOHIT KUMAR SWARNKAR ( R0076)</option>
+                               <option value="  N. R. KARPAL ( R0095)
+">  N. R. KARPAL ( R0095)</option>
+                                 <option value="  N.K. BHOI ( R0033)
+">  N.K. BHOI ( R0033)</option>
+                                   <option value=" NIRMAL KUMAR ( R0094)
+">  NIRMAL KUMAR ( R0094)</option>
+                                     <option value="  NITIN KUMAR KUKDE ( R0112)
+">  NITIN KUMAR KUKDE ( R0112)</option>
+
+                                       <option value="  P.K. PATEL ( R0026)
+">  P.K. PATEL ( R0026)</option>
+                                         <option value="  PANKAJ KUMAR SINGH ( R0072)
+"> PANKAJ KUMAR SINGH ( R0072) </option>
+
+                        <option value=" PAWAN KUMAR SINGH ( R0069) ">  PAWAN KUMAR SINGH ( R0069)</option>
+                                             <option value="PURAN LAL PATEL ( R0111)
+">  PURAN LAL PATEL ( R0111) </option>
+                                              
+                     <option value=" RAJENDRA KUMAR ( R0065)
+"> RAJENDRA KUMAR ( R0065)</option>
+                       <option value=" RAKESH KUMAR KOSTHA ( R0090)
+"> RAKESH KUMAR KOSTHA ( R0090)</option>
+                         <option value="  RANJIT SINGH ( R0103)
+"> RANJIT SINGH ( R0103)</option>
+                           <option value="  S K GAUTAM ( R0082)
+">  S K GAUTAM ( R0082)</option>
+                             <option value="S S HUSSAIN ( R0086)
+">  S S HUSSAIN ( R0086)</option>
+                               <option value=" S. C. RAI ( R0013)
+"> S. C. RAI ( R0013)</option>
+                                 <option value=" S. K. SINGH ( R0015)
+"> S. K. SINGH ( R0015)</option>
+                                   <option value=" S. L. SONI ( R0049)
+"> S. L. SONI ( R0049)</option>
+                                     <option value=" SANAT KUMAR SAHU ( R0101)
+"> SANAT KUMAR SAHU ( R0101)</option>
+                                       <option value="">  A K REDDY (R0071)</option>
+                                         <option value="  A K REDDY (R007SANJAY KUMAR ROY ( R0110)
+1)"> SANJAY KUMAR ROY ( R0110)</option>
+                                           <option value="SANJAY SINGH ( R0109)
+">  SANJAY SINGH ( R0109)</option>
+                                             <option value="SANJEEV KUMAR SHARMA ( R0088)
+">  SANJEEV KUMAR SHARMA ( R0088)</option>
+                                              <option value="">-- Select --</option>
+                     <option value="SANTOSH KUMAR PATKAR ( R0046)
+> SANTOSH KUMAR PATKAR ( R0046)"></option>
+                       <option value=" SHAILENDRA SINGH ( R0036)">SHAILENDRA SINGH ( R0036)</option>
+                         <option value=" SUNDEEP KUMAR SHARMA ( R0080)
+">  </option>SUNDEEP KUMAR SHARMA ( R0080)
+
+                           <option value="  SUNIL KUMAR DEWANGAN ( R0066)
+">  SUNIL KUMAR DEWANGAN ( R0066)</option>
+                             <option value=" V.K. BHAGAT ( R0034)
+">  V.K. BHAGAT ( R0034)</option>
+                               <option value=" VIJAY KUMAR ARYA ( R0025)
+"> VIJAY KUMAR ARYA ( R0025)</option>
+                                 <option value="VIKAS SHENDE ( R0098)
+">  VIKAS SHENDE ( R0098)</option>
+                                   <option value="VINAY KUMAR VINCHURE ( R0050)
+">  VINAY KUMAR VINCHURE ( R0050)</option>
+                                     <option value=" VINAY PANTAWANE ( R0031)
+">  VINAY PANTAWANE ( R0031)</option>
+                                       <option value=" Y. RAMU ( R0056)
+"> Y. RAMU ( R0056)</option>
+                                         <option value=" YOGESH KUMAR MIHAULIA ( R0093)
+">  YOGESH KUMAR MIHAULIA ( R0093)</option>
+                                           
+                </select>
+            </td>
             <td class="field-label">Month:</td>
-            <td class="field-value"><input type="text" id="month" name="month"></td>
+               <td class="field-value">
+                <select id="month" name="month">
+                     <option value="">-- Select --</option>
+                     <option value="JAN">JAN</option>
+                     <option value="FEB">FEB</option>
+                    <option value="MARCH">MARCH</option>
+                     <option value="APRIL">APRIL</option>
+                    <option value="MAY">MAY</option>
+                     <option value="JUNE">JUNE</option>
+                    <option value="JULY">JULY</option>
+                      <option value="AUG">AUG</optiON>
+                        <option value="SEP">SEP</option>
+                     <option value="OCT">OCT</option>
+                    <option value="NOV">NOV</option>
+                      <option value="DEC">DEC</optiON>
+        
             <td class="field-label">Count:</td>
             <td class="field-value"><input type="text" id="count" name="count"></td>
         </tr>
@@ -379,15 +578,59 @@
         </tr>
         <tr>
             <td class="field-label">Section:</td>
-            <td class="field-value"><input type="text" id="section" name="section"></td>
+            <td class="field-value">
+                <select id="section" name="section">
+                    <option value="">-- Select --</option>
+                    <option value="RIG-DURG">RIG-DURG</option>
+                    <option value="DURG-RIG">DURG-RIG</option>
+                    <option value="BSP-R">BSP-R</option>
+                    <option value="R-BSP">R-BSP</option>
+                    <option value="R-KRBA">R-KRBA</option>
+                    <option value="KRBA-R">KRBA-R</option>
+                    <option value="USL-DURG">USL-DURG</option>
+                    <option value="DURG-USL">DURG-USL</option>
+                    <option value="R-GONDIA">R-GONDIA</option>
+                    <option value="GONDIA-R">GONDIA-R</option>
+                    <option value="R-DGG">R-DGG</option>
+                    <option value="DGG-R">DGG-R</option>
+                    <option value="DURG-NITR">DURG-NITR</option>
+                    <option value="NITR-DURG">NITR-DURG</option>
+                </select>
+            </td>
             <td class="field-label">From Station:</td>
-            <td class="field-value"><input type="text" id="fromstation" name="fromstation"></td>
+            <td class="field-value">
+                <select id="fromstation" name="fromstation">
+                    <option value="">-- Select --</option>
+                    <option value="RIG">RIG</option>
+                    <option value="BSP">BSP</option>
+                     <option value="USL">USL</option>
+                    <option value="RAIPUR">RAIPUR</option>
+                     <option value="DURG">DURG</option>
+                    <option value="DGG">DGG</option>
+                     <option value="GONDIA">GONDIA</option>
+                    <option value="NITR">NITR</option>
+                   
+                </select>
+            </td>
             <td class="field-label">To Station:</td>
-            <td class="field-value"><input type="text" id="tostation" name="tostation"></td>
+             <td class="field-value">
+               <select id="tostation" name="tostation">
+                  <option value="">-- Select --</option>
+                            <option value="BSP">BSP</option>
+                     <option value="USL">USL</option>
+                    <option value="RAIPUR">RAIPUR</option>
+                     <option value="DURG">DURG</option>
+                    <option value="DGG">DGG</option>
+                     <option value="GONDIA">GONDIA</option>
+                    <option value="NITR">NITR</option>
+                      <option value="SCLN">SCLN</optiON>
+           
+                </select>
+            </td>
         </tr>
         <tr>
             <td class="field-label">Working Date:</td>
-            <td class="field-value"><input type="text" id="workingdate" name="workingdate"></td>
+            <td class="field-value"><input type="date" id="workingdate" name="workingdate"></td>
             <td class="field-label">Departure Time:</td>
             <td class="field-value"><input type="text" id="departuretime" name="departuretime"></td>
             <td class="field-label">Arrival Time:</td>
@@ -395,7 +638,7 @@
         </tr>
         <tr>
             <td class="field-label">Analysis date:</td>
-            <td class="field-value"><input type="text" id="analysisdate" name="analysisdate"></td>
+            <td class="field-value"><input type="date" id="analysisdate" name="analysisdate"></td>
             <td class="field-label">Load:</td>
             <td class="field-value"><input type="text" id="Load" name="load"></td>
             <td class="field-label">CVVRS Make:</td>
@@ -615,25 +858,23 @@
             <img id="img18" alt="ALP Packing belongings"><input type="file" accept="image/*" onchange="previewImg(event,18)"></div>
     </div>
 
+    <div class="full-line"></div>
+
+    <!-- ALP ABNORMALITIES SCREENSHOTS -->
+    <div class="img-section-title">ANY ABNORMALITIES -</div>
+    <div class="img-grid">
+        <div class="img-card"><span class="img-card-label"> Abnormality Screenshot 1</span>
+            <img id="img19" alt="ALP Abnormality 1"><input type="file" accept="image/*" onchange="previewImg(event,19)"></div>
+        <div class="img-card"><span class="img-card-label">ALP Abnormality Screenshot 2</span>
+            <img id="img20" alt="ALP Abnormality 2"><input type="file" accept="image/*" onchange="previewImg(event,20)"></div>
+        <div class="img-card"><span class="img-card-label"> Abnormality Screenshot 3</span>
+            <img id="img21" alt=" Abnormality 3"><input type="file" accept="image/*" onchange="previewImg(event,21)"></div>
+    </div>
+
 </div><!-- /fullReport -->
 
-<!-- Logo upload -->
-<div style="max-width:1200px; margin:10px auto 0; display:flex; align-items:center; gap:12px;
-            background:#003366; color:#fff; padding:10px 16px; border-radius:6px; position:relative; z-index:5;">
-    <strong style="white-space:nowrap;">📷 Load Rail Logo (rail.jpeg):</strong>
-    <input type="file" id="logoUpload" accept="image/*" onchange="loadLogo(event)"
-           style="color:#fff; font-size:13px; flex:1;">
-    <span style="font-size:12px; color:#c8dff5;">Appears on both sides of the heading</span>
-</div>
 
-<!-- Crew Data Excel Upload -->
-<div style="max-width:1200px; margin:10px auto 0; display:flex; align-items:center; gap:12px;
-            background:#1a7a1a; color:#fff; padding:10px 16px; border-radius:6px; position:relative; z-index:5;">
-    <strong style="white-space:nowrap;">📊 Replace Crew Data (Excel/CSV):</strong>
-    <input type="file" id="crewDataUpload" accept=".xlsx,.xls,.csv" onchange="handleCrewDataUpload(event)"
-           style="color:#fff; font-size:13px; flex:1;">
-    <span style="font-size:12px; color:#c8dff5;">Upload Excel or CSV file to replace crew data</span>
-</div>
+
 
 <!-- Reload Crew button -->
 <button class="btn-reload-crew" type="button" onclick="loadCrewData()">
@@ -1276,11 +1517,95 @@ function processUploadedCrewData(rows) {
 }
 
 /* ================================================================
+   FIELD CHANGE TRACKING - Red background for changed fields
+   ================================================================ */
+// Store default values for observation fields
+const defaultValues = {};
+
+function initializeFieldTracking() {
+    // Define sections to track
+    const sections = {
+        cto: ['cto1_logbook', 'cto1_bpc', 'cto2', 'cto3', 'cto4'],
+        cho: ['cho1', 'cho2', 'cho3'],
+        halt: ['halt1', 'halt2', 'halt3', 'halt4', 'halt5', 'halt6'],
+        run: ['run1_bft', 'run1_bpt', 'run2', 'run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9', 'run10', 'run11']
+    };
+
+    // Store default values and attach change listeners
+    Object.values(sections).flat().forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            // Store default value (first option for select elements)
+            if (field.tagName === 'SELECT') {
+                defaultValues[fieldId] = field.options[0]?.value || field.value;
+            }
+
+            // Attach change listener
+            field.addEventListener('change', function() {
+                checkFieldChange(this);
+            });
+        }
+    });
+}
+
+function checkFieldChange(field) {
+    const fieldId = field.id;
+    const currentValue = field.value;
+    const defaultValue = defaultValues[fieldId];
+
+    // If current value differs from default, add 'changed' class
+    if (currentValue !== defaultValue) {
+        field.classList.add('changed');
+    } else {
+        field.classList.remove('changed');
+    }
+}
+
+/* ================================================================
    INIT — load crew data on page load
    ================================================================ */
 window.addEventListener("DOMContentLoaded", () => {
     loadCrewData();
+    initializeFieldTracking();
 });
+</script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
 </script>
 </body>
 </html>
