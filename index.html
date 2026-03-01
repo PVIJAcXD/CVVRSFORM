@@ -9,6 +9,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -250,8 +251,8 @@
             font-weight: bold;
         }
         body.dark-mode .obs-row select { background: #2a2a4a; color: #fff; border-color: #4a90d9; }
-        .obs-row select.changed { background: #ff4444 !important; }
-        body.dark-mode .obs-row select.changed { background: #cc0000 !important; }
+        .obs-row select.changed { background: #ff0000 !important; color: #fff !important; border-color: #cc0000 !important; }
+        body.dark-mode .obs-row select.changed { background: #ff0000 !important; color: #fff !important; border-color: #cc0000 !important; }
         .obs-row input[type="text"] {
             width: 200px; height: 26px; padding: 3px 6px; font-size: 13px;
             background-color: #d6dde1; border: 1px solid #888; border-radius: 3px; flex-shrink: 0;
@@ -1408,6 +1409,9 @@ async function generatePDF() {
 
     document.querySelectorAll(".autocomplete-list").forEach(d => d.style.display = "none");
 
+    // Preserve changed field styling
+    preserveChangedFieldsForPDF();
+
     const controls = element.querySelectorAll("input[type='text'], textarea, select");
     controls.forEach(ctrl => {
         let val = (ctrl.tagName === "SELECT")
@@ -1416,6 +1420,16 @@ async function generatePDF() {
         const span = document.createElement("span");
         span.className = "print-value";
         span.textContent = val || "\u00a0";
+
+        // If this select was changed (red), apply red background to the span
+        if (ctrl.tagName === "SELECT" && ctrl.classList.contains('changed')) {
+            span.style.backgroundColor = "#ff0000";
+            span.style.color = "#fff";
+            span.style.padding = "4px 6px";
+            span.style.borderRadius = "3px";
+            span.style.fontWeight = "bold";
+        }
+
         ctrl.style.display = "none";
         ctrl.parentNode.insertBefore(span, ctrl.nextSibling);
         span.style.display = "inline";
@@ -1539,6 +1553,9 @@ function initializeFieldTracking() {
             // Store default value (first option for select elements)
             if (field.tagName === 'SELECT') {
                 defaultValues[fieldId] = field.options[0]?.value || field.value;
+
+                // Initialize - check if current value is already different from default
+                checkFieldChange(field);
             }
 
             // Attach change listener
@@ -1554,12 +1571,23 @@ function checkFieldChange(field) {
     const currentValue = field.value;
     const defaultValue = defaultValues[fieldId];
 
-    // If current value differs from default, add 'changed' class
+    // If current value differs from default, add 'changed' class (red background)
     if (currentValue !== defaultValue) {
         field.classList.add('changed');
     } else {
         field.classList.remove('changed');
     }
+}
+
+// Function to preserve changed styling in PDF
+function preserveChangedFieldsForPDF() {
+    // Find all select elements with 'changed' class
+    const changedSelects = document.querySelectorAll('.obs-row select.changed');
+
+    changedSelects.forEach(select => {
+        // Mark it with a data attribute so we can identify it later
+        select.setAttribute('data-was-changed', 'true');
+    });
 }
 
 /* ================================================================
