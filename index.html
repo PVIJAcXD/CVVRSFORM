@@ -10,6 +10,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1464,7 +1465,14 @@ async function generatePDF() {
             remaining -= pageH; offset += pageH;
         }
         hideLoading();
-        pdf.save("CVVRS_Report_A4.pdf");
+
+        // Generate dynamic filename using LP name
+        const lpName = getVal("lpname").trim();
+        const filename = lpName
+            ? `CVVRS Report ${lpName}.pdf`
+            : "CVVRS_Report_A4.pdf";
+
+        pdf.save(filename);
     } catch (err) {
         hideLoading();
         alert("PDF generation failed: " + err.message);
