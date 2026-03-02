@@ -11,6 +11,9 @@
 
 
 
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +41,40 @@
             background: linear-gradient(270deg, #AFF1D3, #073f3f, #0a6e6e, #AFF1D3);
             background-size: 400% 400%;
             animation: gradientShift 12s ease infinite;
-            color: #111;
+            color: #000;
+        }
+
+        body.light-mode #fullReport {
+            color: #000;
+        }
+
+        body.light-mode .obs-label,
+        body.light-mode .crew-label,
+        body.light-mode .field-label,
+        body.light-mode .obs-row,
+        body.light-mode .info-table td {
+            color: #000;
+        }
+
+        /* Light mode - black text for all inputs, selects, and textareas */
+        body.light-mode .info-table input[type="text"],
+        body.light-mode .info-table input[type="date"],
+        body.light-mode .info-table select,
+        body.light-mode .crew-table input[type="text"],
+        body.light-mode .obs-row select,
+        body.light-mode .obs-row input[type="text"],
+        body.light-mode .remarks-area {
+            color: #000 !important;
+        }
+
+        body.light-mode .info-table input[type="text"]::placeholder,
+        body.light-mode .info-table input[type="date"]::placeholder,
+        body.light-mode .info-table select::placeholder,
+        body.light-mode .crew-table input[type="text"]::placeholder,
+        body.light-mode .obs-row input[type="text"]::placeholder,
+        body.light-mode .remarks-area::placeholder {
+            color: #000 !important;
+            opacity: 0.6;
         }
 
         body.dark-mode {
@@ -505,20 +541,17 @@
 "> S. L. SONI ( R0049)</option>
                                      <option value=" SANAT KUMAR SAHU ( R0101)
 "> SANAT KUMAR SAHU ( R0101)</option>
-                                       <option value="">  A K REDDY (R0071)</option>
-                                         <option value="  A K REDDY (R007SANJAY KUMAR ROY ( R0110)
-1)"> SANJAY KUMAR ROY ( R0110)</option>
+                                       <option value=""> SUNDEEP KUMAR SHARMA</option>
+                                         <option value="  SUNDEEP KUMAR SHARMA ( R0080)
+"> SANJAY KUMAR ROY ( R0110)</option>
                                            <option value="SANJAY SINGH ( R0109)
 ">  SANJAY SINGH ( R0109)</option>
                                              <option value="SANJEEV KUMAR SHARMA ( R0088)
-">  SANJEEV KUMAR SHARMA ( R0088)</option>
-                                             
+">  SANJEEV KUMAR SHARMA ( R0088)</option>                                        
                      <option value="SANTOSH KUMAR PATKAR ( R0046)
 > SANTOSH KUMAR PATKAR ( R0046)"></option>
                        <option value=" SHAILENDRA SINGH ( R0036)">SHAILENDRA SINGH ( R0036)</option>
-                    <option value=" SUNDEEP KUMAR SHARMA ( R0080)"> 
-SUNDEEP KUMAR SHARMA ( R0080) </option>
-
+                         
 
                            <option value="  SUNIL KUMAR DEWANGAN ( R0066)
 ">  SUNIL KUMAR DEWANGAN ( R0066)</option>
@@ -536,9 +569,6 @@ SUNDEEP KUMAR SHARMA ( R0080) </option>
 "> Y. RAMU ( R0056)</option>
                                          <option value=" YOGESH KUMAR MIHAULIA ( R0093)
 ">  YOGESH KUMAR MIHAULIA ( R0093)</option>
-                
-    <option value=" OTHER"
-">  OTHER</option>
                                            
                 </select>
             </td>
@@ -1473,7 +1503,7 @@ async function generatePDF() {
         // Generate dynamic filename using LP name
         const lpName = getVal("lpname").trim();
         const filename = lpName
-            ? `CVVRS Report ${lpName}.pdf`
+            ? `CVVRS_REPORT ${lpName}.pdf`
             : "CVVRS_Report_A4.pdf";
 
         pdf.save(filename);
@@ -1609,6 +1639,44 @@ window.addEventListener("DOMContentLoaded", () => {
     loadCrewData();
     initializeFieldTracking();
 });
+</script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
 </script>
 <!-- Code injected by live-server -->
 <script>
