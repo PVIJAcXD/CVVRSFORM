@@ -14,6 +14,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1447,6 +1449,13 @@ async function generatePDF() {
     // Preserve changed field styling
     preserveChangedFieldsForPDF();
 
+    // FORCE LIGHT MODE for PDF generation
+    const wasInDarkMode = document.body.classList.contains('dark-mode');
+    if (wasInDarkMode) {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+    }
+
     const controls = element.querySelectorAll("input[type='text'], textarea, select");
     controls.forEach(ctrl => {
         let val = (ctrl.tagName === "SELECT")
@@ -1511,6 +1520,12 @@ async function generatePDF() {
         hideLoading();
         alert("PDF generation failed: " + err.message);
     } finally {
+        // RESTORE DARK MODE if it was active before PDF generation
+        if (wasInDarkMode) {
+            document.body.classList.remove('light-mode');
+            document.body.classList.add('dark-mode');
+        }
+
         controls.forEach(ctrl => {
             ctrl.style.display = "";
             const next = ctrl.nextSibling;
