@@ -15,7 +15,6 @@
 
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,10 +62,16 @@
         body.light-mode .info-table input[type="date"],
         body.light-mode .info-table select,
         body.light-mode .crew-table input[type="text"],
-        body.light-mode .obs-row select,
         body.light-mode .obs-row input[type="text"],
         body.light-mode .remarks-area {
             color: #000 !important;
+        }
+
+        /* Observation dropdowns - always black text on light green (both light and dark mode) */
+        body.light-mode .obs-row select,
+        body.dark-mode .obs-row select {
+            background: #90EE90;
+            color: #000;
         }
 
         body.light-mode .info-table input[type="text"]::placeholder,
@@ -284,12 +289,12 @@
         .obs-label { flex: 1; font-weight: bold; font-size: 12.5px; padding-right: 10px; }
         .obs-row select {
             width: 100px; padding: 4px; font-size: 13px;
-            border: 1px solid #888; border-radius: 3px; background: #d6dde1; flex-shrink: 0;
+            border: 1px solid #888; border-radius: 3px; background: #90EE90; flex-shrink: 0;
             transition: background 0.3s, color 0.3s, border-color 0.3s;
-            color: #fff;
+            color: #000;
             font-weight: bold;
         }
-        body.dark-mode .obs-row select { background: #2a2a4a; color: #fff; border-color: #4a90d9; }
+        body.dark-mode .obs-row select { background: #90EE90; color: #000; border-color: #4a90d9; }
         .obs-row select.changed { background: #ff0000 !important; color: #fff !important; border-color: #cc0000 !important; }
         body.dark-mode .obs-row select.changed { background: #ff0000 !important; color: #fff !important; border-color: #cc0000 !important; }
         .obs-row input[type="text"] {
@@ -495,7 +500,9 @@
 ">  K P LAHARE ( R0089)</option>
                                            <option value="K. K. SAHU ( R0043)
 ">  K. K. SAHU ( R0043)</option>
-                                             <option value="  K P HIRWANI ( R0108)
+                                             <option value="  KAMLESH KUMAR RAJABHOJ (R0068)
+"> KAMLESH KUMAR RAJABHOJ ( R0068)</option>
+ <option value="  K P HIRWANI ( R0108)
 "> K P HIRWANI ( R0108)</option>
                      <option value="  KHUSHAL SINGH ( R0042)
 ">  KHUSHAL SINGH ( R0042)</option>
@@ -1449,13 +1456,6 @@ async function generatePDF() {
     // Preserve changed field styling
     preserveChangedFieldsForPDF();
 
-    // FORCE LIGHT MODE for PDF generation
-    const wasInDarkMode = document.body.classList.contains('dark-mode');
-    if (wasInDarkMode) {
-        document.body.classList.remove('dark-mode');
-        document.body.classList.add('light-mode');
-    }
-
     const controls = element.querySelectorAll("input[type='text'], textarea, select");
     controls.forEach(ctrl => {
         let val = (ctrl.tagName === "SELECT")
@@ -1520,12 +1520,6 @@ async function generatePDF() {
         hideLoading();
         alert("PDF generation failed: " + err.message);
     } finally {
-        // RESTORE DARK MODE if it was active before PDF generation
-        if (wasInDarkMode) {
-            document.body.classList.remove('light-mode');
-            document.body.classList.add('dark-mode');
-        }
-
         controls.forEach(ctrl => {
             ctrl.style.display = "";
             const next = ctrl.nextSibling;
