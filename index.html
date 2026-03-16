@@ -16,6 +16,11 @@
 
 
 
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -120,6 +125,21 @@
         }
         .dark-toggle-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.04); }
 
+        .dashboard-btn {
+            background: rgba(0, 51, 102, 0.9);
+            border: 2px solid rgba(74, 144, 217, 0.6);
+            color: #fff; padding: 7px 18px; border-radius: 30px;
+            cursor: pointer; font-size: 13px; font-weight: bold;
+            backdrop-filter: blur(6px); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 6px;
+            text-decoration: none;
+        }
+        .dashboard-btn:hover {
+            background: rgba(0, 85, 153, 0.95);
+            transform: scale(1.04);
+            border-color: rgba(74, 144, 217, 1);
+        }
+
         /* Crew data status badge */
         .crew-status-badge {
             background: rgba(255,255,255,0.15);
@@ -161,7 +181,7 @@
         }
         .report-header .logo-box img { width: 72px; height: 72px; object-fit: contain; border-radius: 4px; }
         .report-header .header-text { flex: 1; text-align: center; padding: 0 10px; }
-        .report-title { font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #fff; line-height: 1.3; }
+        .report-title { font-size: 32px; font-weight: bold; letter-spacing: 2px; color: #00FFFF; line-height: 1.3; }
         .report-subtitle { font-size: 15px; font-weight: bold; color: #c8dff5; margin-top: 4px; }
 
         /* ===== DIVIDERS ===== */
@@ -211,15 +231,15 @@
         .section-heading.spaced { letter-spacing: 14px; }
 
         /* ===== CREW TABLE ===== */
-        .crew-table { width: 100%; border-collapse: collapse; border: 1px solid #aaa; margin-bottom: 10px; }
-        body.dark-mode .crew-table { border-color: #4a90d9; }
+        .crew-table { width: 100%; border-collapse: collapse; border: 3px solid #003366; margin-bottom: 10px; box-shadow: 0 0 10px rgba(0, 51, 102, 0.3); }
+        body.dark-mode .crew-table { border-color: #4a90d9; box-shadow: 0 0 10px rgba(74, 144, 217, 0.3); }
         .crew-table th {
             background-color: #003366; color: #fff;
-            text-align: center; padding: 7px; font-size: 14px; width: 50%;
+            text-align: center; padding: 7px; font-size: 14px; width: 50%; border: 2px solid #003366;
         }
-        body.dark-mode .crew-table th { background-color: #1a3a6e; }
-        .crew-table td { padding: 5px 10px; vertical-align: middle; border-bottom: 1px solid #ddd; }
-        body.dark-mode .crew-table td { border-bottom-color: #2a2a4a; }
+        body.dark-mode .crew-table th { background-color: #1a3a6e; border-color: #4a90d9; }
+        .crew-table td { padding: 5px 10px; vertical-align: middle; border: 1px solid #003366; }
+        body.dark-mode .crew-table td { border-color: #4a90d9; }
         .crew-table .crew-label { font-weight: bold; width: 140px; white-space: nowrap; }
         body.dark-mode .crew-table .crew-label { color: #a0c4ff; }
         .crew-table .crew-val { width: calc(50% - 140px); }
@@ -409,6 +429,113 @@
             animation: spin 0.9s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== THANK YOU OVERLAY ===== */
+        .thankyou-overlay {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35%; max-width: 500px; background: rgba(0,0,0,0.85);
+            z-index: 10000; align-items: center; justify-content: center;
+            flex-direction: column; gap: 20px; border-radius: 15px;
+            padding: 30px;
+        }
+        .thankyou-overlay.active { display: flex; }
+
+        .fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border-radius: 15px;
+        }
+
+        .thankyou-content {
+            text-align: center; color: #fff;
+            padding: 15px; border-radius: 15px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transform: scale(0.5);
+            animation: popIn 0.6s ease-out forwards;
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            70% {
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .thankyou-animation {
+            width: 150px; height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .thankyou-message {
+            font-size: 14px; font-weight: bold;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #00FFFF, #FFD700, #FF1493, #00FF00);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite, bounce 1s ease-in-out 0.3s;
+            text-shadow: 0 0 20px rgba(0,255,255,0.5);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .thankyou-name {
+            font-size: 12px; font-weight: bold;
+            color: #FFD700; margin-top: 5px;
+            text-shadow:
+                0 0 10px rgba(255,215,0,0.8),
+                0 0 20px rgba(255,215,0,0.6),
+                0 0 30px rgba(255,215,0,0.4),
+                2px 2px 4px rgba(0,0,0,0.5);
+            animation: glow 2s ease-in-out infinite, slideUp 0.8s ease-out 0.5s backwards;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow:
+                0 0 10px rgba(255,215,0,0.8),
+                0 0 20px rgba(255,215,0,0.6),
+                0 0 30px rgba(255,215,0,0.4),
+                2px 2px 4px rgba(0,0,0,0.5);
+            }
+            50% { text-shadow:
+                0 0 20px rgba(255,215,0,1),
+                0 0 30px rgba(255,215,0,0.8),
+                0 0 40px rgba(255,215,0,0.6),
+                2px 2px 4px rgba(0,0,0,0.5);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -420,6 +547,16 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- Thank You Overlay -->
+<div class="thankyou-overlay" id="thankyouOverlay">
+    <canvas class="fireworks-canvas" id="fireworksCanvas"></canvas>
+    <div class="thankyou-content">
+        <img class="thankyou-animation" id="fireworksGif" src="https://i.pinimg.com/originals/f1/24/c2/f124c221aba3fb6e0187ec39baa0317a.gif" alt="Fireworks">
+        <div class="thankyou-message">THANK YOU FOR SUBMITTING DATA</div>
+        <div class="thankyou-name" id="thankyouName"></div>
+    </div>
+</div>
+
 <!-- ================================================================
      TOP BAR
      ================================================================ -->
@@ -428,6 +565,9 @@
         <span class="badge-dot"></span>
         <span id="crewStatusText">Loading crew data...</span>
     </div>
+    <a href="https://pvijacxd.github.io/cvvrsdashboard/" target="_blank" class="dashboard-btn">
+        📊 OPEN CVVRS DASHBOARD
+    </a>
     <button class="dark-toggle-btn" onclick="toggleDarkMode()" id="darkBtn">
         <span class="toggle-moon">☀️</span> Light Mode
     </button>
@@ -456,129 +596,127 @@
             <td class="field-value">
                 <select id="analysedby" name="analysedby">
                     <option value="">-- Select --</option>
-                     <option value="  A K REDDY (R0071)">  A K REDDY (R0071)</option>
-                       <option value="  A P SHRIVASTAV ">
- A P SHRIVASTAV /BIA</option>
-                     <option value="  A.R.TARAM ( R0038)">  A.R.TARAM ( R0038)</option>
-                           <option value=" ABDUL MOIN KHAN ( R0022)">  ABDUL MOIN KHAN ( R0022)</option>
-                             <option value="  AKHILESH KUMAR ( R0064)">  AKHILESH KUMAR ( R0064)</option>
-                               <option value="  AMIT KUMAR BANKURE ( R0105)">  AMIT KUMAR BANKURE ( R0105)</option>
-                                 <option value=" ANKIT RAM KANT ( R0096)
-">  ANKIT RAM KANT ( R0096)</option>
+                     <option value="  A K REDDY/CLI/R (R0071)">  A K REDDY/CLI/R (R0071)</option>
+                       <option value="  A P SHRIVASTAV/CLI/BIA ">
+ A P SHRIVASTAV /CLI/BIA</option>
+                     <option value="  A.R.TARAM/CLI/BIA ( R0038)">  A.R.TARAM /CLI/BIA( R0038)</option>
+                           <option value=" ABDUL MOIN KHAN/CLI/BIA ( R0022)">  ABDUL MOIN KHAN/CLI/BIA ( R0022)</option>
+                             <option value="  AKHILESH KUMAR/CLI/BIA ( R0064)">  AKHILESH KUMAR/CLI/BIA ( R0064)</option>
+                               <option value="  AMIT KUMAR BANKURE/CLI/BYT ( R0105)">  AMIT KUMAR BANKURE/CLI/BYT ( R0105)</option>
+                                 <option value=" ANKIT RAM KANT/CLI/BIA ( R0096)
+">  ANKIT RAM KANT/CLI/BIA ( R0096)</option>
                                    <option value="  ASHISH WANJARI ( R0106)"> ASHISH WANJARI ( R0106)
 </option>
-                                     <option value="  AVON KUMAR SAHU ( R0078)
-">  AVON KUMAR SAHU ( R0078)</option>
-                                       <option value=" B B KUSHWAHA ( R0079)
-">  B B KUSHWAHA ( R0079)</option>
-                                         <option value=" B K HARMUKH ( R0087)
-">  B K HARMUKH ( R0087)</option>
-                                           <option value="  B. K. SAHA ( R0007)
-">  B. K. SAHA ( R0007)</option>
-                                             <option value=" B.K.SONI ( R0035)
-">  B.K.SONI ( R0035)</option>
+                                     <option value="  AVON KUMAR SAHU/CLI/R ( R0078)
+">  AVON KUMAR SAHU/CLI/R ( R0078)</option>
+                                       <option value=" B B KUSHWAHA/CLI/BIA ( R0079)
+">  B B KUSHWAHA/CLI/BIA ( R0079)</option>
+                                         <option value=" B K HARMUKH /CLI/BIA( R0087)
+">  B K HARMUKH/CLI/BIA ( R0087)</option>
+                                           <option value="  B. K. SAHA/CLI/BIA ( R0007)
+">  B. K. SAHA/CLI/BIA ( R0007)</option>
+                                             <option value=" B.K.SONI/CLI/BIA ( R0035)
+">  B.K.SONI/CLI/BIA ( R0035)</option>
                                     
-                     <option value="  BHARAT SINGH ATBHAIYYA ( R0075)
-">  BHARAT SINGH ATBHAIYYA ( R0075)</option>
-                       <option value="  BINOD KUMAR RAM ( R0057)
-">BINOD KUMAR RAM ( R0057)</option>
-                         <option value="  DEEPANNITA PUNTAMBEKAR ( R0059)
-">  DEEPANNITA PUNTAMBEKAR ( R0059)</option>
+                     <option value="  BHARAT SINGH ATBHAIYYA/CLI/R ( R0075)
+">  BHARAT SINGH ATBHAIYYA/CLI/R ( R0075)</option>
+                       <option value="  BINOD KUMAR RAM/CLI/R( R0057)
+">BINOD KUMAR RAM/CLI/R ( R0057)</option>
+                         <option value="  DEEPANNITA PUNTAMBEKAR/CLI/BIA ( R0059)
+">  DEEPANNITA PUNTAMBEKAR/CLI/BIA ( R0059)</option>
                           
                              <option value="  DILLI RAO ( R0102)
 ">  DILLI RAO ( R0102)</option>
-                               <option value="  G. C. BISWAS ( R0047)
-">  G. C. BISWAS ( R0047)</option>
+                               <option value="  G. C. BISWAS/CLI/R ( R0047)
+">  G. C. BISWAS/CLI/R ( R0047)</option>
                                  <option value="  G. V. R. K. MADHU ( R0010)
 ">  G. V. R. K. MADHU ( R0010)</option>
-                                   <option value=" GIRDHARI LAL ( R0077)
-">  GIRDHARI LAL ( R0077)</option>
-                                     <option value="  JAISHANKAR SHARMA ( R0092)
-">  JAISHANKAR SHARMA ( R0092)</option>
+                                   <option value=" GIRDHARI LAL/CLI/R ( R0077)
+">  GIRDHARI LAL/CLI/R ( R0077)</option>
+                                     <option value="  JAISHANKAR SHARMA/CLI/BIA ( R0092)
+">  JAISHANKAR SHARMA/CLI/BIA ( R0092)</option>
                                        <option value="  JITENDRA KUMAR MISHRA ( R0104)
 ">  JITENDRA KUMAR MISHRA ( R0104)</option>
-                                         <option value="  K P LAHARE ( R0089)
-">  K P LAHARE ( R0089)</option>
-                                           <option value="K. K. SAHU ( R0043)
-">  K. K. SAHU ( R0043)</option>
-                                             <option value="  KAMLESH KUMAR RAJABHOJ (R0068)
-"> KAMLESH KUMAR RAJABHOJ ( R0068)</option>
- <option value="  K P HIRWANI ( R0108)
+                                         <option value="  K P LAHARE/CLI/R ( R0089)
+">  K P LAHARE/CLI/R ( R0089)</option>
+                                           <option value="K. K. SAHU/CLI/BIA ( R0043)
+">  K. K. SAHU/CLI/BIA ( R0043)</option>
+                                             <option value="  K P HIRWANI ( R0108)
 "> K P HIRWANI ( R0108)</option>
                      <option value="  KHUSHAL SINGH ( R0042)
 ">  KHUSHAL SINGH ( R0042)</option>
-                       <option value="  MAHESHWAR ( R0099)
-">  MAHESHWAR ( R0099)</option>
-                         <option value="  MANOJ KUMAR SAO ( R0084)
-">  MANOJ KUMAR SAO ( R0084)</option>
-                           <option value=" M L CHANDRAKAR ( R0063)
-">  M L CHANDRAKAR ( R0063)</option>
-                             <option value="  MOHIT KUMAR SWARNKAR ( R0076)
-">  MOHIT KUMAR SWARNKAR ( R0076)</option>
-                               <option value="  N. R. KARPAL ( R0095)
-">  N. R. KARPAL ( R0095)</option>
-                                 <option value="  N.K. BHOI ( R0033)
-">  N.K. BHOI ( R0033)</option>
+                       <option value="  MAHESHWAR/CLI/BIA ( R0099)
+">  MAHESHWAR/CLI/BIA ( R0099)</option>
+                         <option value="  MANOJ KUMAR SAO/CLI/R ( R0084)
+">  MANOJ KUMAR SAO /CLI/R( R0084)</option>
+                           <option value=" M L CHANDRAKAR /CLI/R( R0063)
+">  M L CHANDRAKAR/CLI/R ( R0063)</option>
+                             <option value="  MOHIT KUMAR SWARNKAR /CLI/BIA( R0076)
+">  MOHIT KUMAR SWARNKAR/CLI/BIA ( R0076)</option>
+                               <option value="  N. R. KARPAL/CLI/BIA ( R0095)
+">  N. R. KARPAL/CLI/BIA ( R0095)</option>
+                                 <option value="  N.K. BHOI /CLI/R( R0033)
+">  N.K. BHOI/CLI/R ( R0033)</option>
                                    <option value=" NIRMAL KUMAR ( R0094)
 ">  NIRMAL KUMAR ( R0094)</option>
                                      <option value="  NITIN KUMAR KUKDE ( R0112)
 ">  NITIN KUMAR KUKDE ( R0112)</option>
 
-                                       <option value="  P.K. PATEL ( R0026)
-">  P.K. PATEL ( R0026)</option>
-                                         <option value="  PANKAJ KUMAR SINGH ( R0072)
-"> PANKAJ KUMAR SINGH ( R0072) </option>
+                                       <option value="  P.K. PATEL/CLI/BIA ( R0026)
+">  P.K. PATEL/CLI/BIA ( R0026)</option>
+                                         <option value="  PANKAJ KUMAR SINGH /CLI/BIA( R0072)
+"> PANKAJ KUMAR SINGH/CLI/BIA ( R0072) </option>
 
-                        <option value=" PAWAN KUMAR SINGH ( R0069) ">  PAWAN KUMAR SINGH ( R0069)</option>
+                        <option value=" PAWAN KUMAR SINGH /CLI/BIA( R0069) ">  PAWAN KUMAR SINGH /CLI/BIA( R0069)</option>
                                              <option value="PURAN LAL PATEL ( R0111)
 ">  PURAN LAL PATEL ( R0111) </option>
                                               
-                     <option value=" RAJENDRA KUMAR ( R0065)
-"> RAJENDRA KUMAR ( R0065)</option>
-                       <option value=" RAKESH KUMAR KOSTHA ( R0090)
-"> RAKESH KUMAR KOSTHA ( R0090)</option>
+                     <option value=" RAJENDRA KUMAR/CLI/BIA ( R0065)
+"> RAJENDRA KUMAR/CLI/BIA ( R0065)</option>
+                       <option value=" RAKESH KUMAR KOSTHA/CLI/DRZ ( R0090)
+"> RAKESH KUMAR KOSTHA/CLI/DRZ ( R0090)</option>
                          <option value="  RANJIT SINGH ( R0103)
 "> RANJIT SINGH ( R0103)</option>
-                           <option value="  S K GAUTAM ( R0082)
-">  S K GAUTAM ( R0082)</option>
-                             <option value="S S HUSSAIN ( R0086)
-">  S S HUSSAIN ( R0086)</option>
-                               <option value=" S. C. RAI ( R0013)
-"> S. C. RAI ( R0013)</option>
-                                 <option value=" S. K. SINGH ( R0015)
-"> S. K. SINGH ( R0015)</option>
-                                   <option value=" S. L. SONI ( R0049)
-"> S. L. SONI ( R0049)</option>
+                           <option value="  S K GAUTAM/CLI/BIA ( R0082)
+">  S K GAUTAM /CLI/BIA( R0082)</option>
+                             <option value="S S HUSSAIN /CLI/BIA( R0086)
+">  S S HUSSAIN /CLI/BIA( R0086)</option>
+                               <option value=" S. C. RAI/CLI/BIA ( R0013)
+"> S. C. RAI /CLI/BIA( R0013)</option>
+                                 <option value=" S. K. SINGH /CLI/BIA( R0015)
+"> S. K. SINGH /CLI/BIA( R0015)</option>
+                                   <option value=" S. L. SONI/CLI/R ( R0049)
+"> S. L. SONI/CLI/R ( R0049)</option>
                                      <option value=" SANAT KUMAR SAHU ( R0101)
 "> SANAT KUMAR SAHU ( R0101)</option>
-                                       <option value=""> SUNDEEP KUMAR SHARMA</option>
-                                         <option value="  SUNDEEP KUMAR SHARMA ( R0080)
+                                       <option value=""> SUNDEEP KUMAR SHARMA/CLI/BIA</option>
+                                         <option value="  SUNDEEP KUMAR SHARMA/CLI/BIA ( R0080)
 "> SANJAY KUMAR ROY ( R0110)</option>
                                            <option value="SANJAY SINGH ( R0109)
 ">  SANJAY SINGH ( R0109)</option>
-                                             <option value="SANJEEV KUMAR SHARMA ( R0088)
-">  SANJEEV KUMAR SHARMA ( R0088)</option>                                        
+                                             <option value="SANJEEV KUMAR SHARMA/CLI/BIA ( R0088)
+">  SANJEEV KUMAR SHARMA/CLI/BIA ( R0088)</option>                                        
                      <option value="SANTOSH KUMAR PATKAR ( R0046)
 > SANTOSH KUMAR PATKAR ( R0046)"></option>
-                       <option value=" SHAILENDRA SINGH ( R0036)">SHAILENDRA SINGH ( R0036)</option>
+                       <option value=" SHAILENDRA SINGH/CLI/BIA ( R0036)">SHAILENDRA SINGH/CLI/BIA ( R0036)</option>
                          
 
-                           <option value="  SUNIL KUMAR DEWANGAN ( R0066)
-">  SUNIL KUMAR DEWANGAN ( R0066)</option>
+                           <option value="  SUNIL KUMAR DEWANGAN/CLI/BIA ( R0066)
+">  SUNIL KUMAR DEWANGAN/CLFI/BIA ( R0066)</option>
                              <option value=" V.K. BHAGAT ( R0034)
 ">  V.K. BHAGAT ( R0034)</option>
-                               <option value=" VIJAY KUMAR ARYA ( R0025)
-"> VIJAY KUMAR ARYA ( R0025)</option>
-                                 <option value="VIKAS SHENDE ( R0098)
-">  VIKAS SHENDE ( R0098)</option>
-                                   <option value="VINAY KUMAR VINCHURE ( R0050)
-">  VINAY KUMAR VINCHURE ( R0050)</option>
+                               <option value=" VIJAY KUMAR ARYA/CLI/BIA ( R0025)
+"> VIJAY KUMAR ARYA/CLI/BIA ( R0025)</option>
+                                 <option value="VIKAS SHENDE/CLI/R ( R0098)
+">  VIKAS SHENDE/CLI/R ( R0098)</option>
+                                   <option value="VINAY KUMAR VINCHURE/CLI/BIA ( R0050)
+">  VINAY KUMAR VINCHURE/CLI/BIA ( R0050)</option>
                                      <option value=" VINAY PANTAWANE ( R0031)
 ">  VINAY PANTAWANE ( R0031)</option>
-                                       <option value=" Y. RAMU ( R0056)
-"> Y. RAMU ( R0056)</option>
-                                         <option value=" YOGESH KUMAR MIHAULIA ( R0093)
-">  YOGESH KUMAR MIHAULIA ( R0093)</option>
+                                       <option value=" Y. RAMU/CLI/BIA ( R0056)
+"> Y. RAMU/CLAI/BIA ( R0056)</option>
+                                         <option value=" YOGESH KUMAR MIHAULIA/CLI/BIA ( R0093)
+">  YOGESH KUMAR MIHAULIA/CLI/BIA ( R0093)</option>
                                            
                 </select>
             </td>
@@ -1348,6 +1486,12 @@ async function submitToGoogleSheets() {
         return;
     }
 
+    // Prevent multiple submissions
+    if (formSubmitted) {
+        showToast("⚠️ Data already submitted!", true);
+        return;
+    }
+
     const data = {
         "Timestamp":              new Date().toLocaleString(),
         "Analysed By":            getVal("analysedby"),
@@ -1427,10 +1571,143 @@ async function submitToGoogleSheets() {
         });
         hideLoading();
         formSubmitted = true; // Mark form as submitted
-        showToast("✅ Data submitted successfully!", false);
+
+        // Show thank you overlay with analyst name
+        showThankYouOverlay();
     } catch (err) {
         hideLoading();
         showToast("❌ Submission failed: " + err.message, true);
+    }
+}
+
+/* ================================================================
+   THANK YOU OVERLAY
+   ================================================================ */
+function showThankYouOverlay() {
+    // Get analyst name from the "Analysed By" dropdown
+    const analysedBySelect = document.getElementById("analysedby");
+    const analystName = analysedBySelect.options[analysedBySelect.selectedIndex]?.text || "Unknown Analyst";
+
+    // Set the analyst name in the overlay
+    document.getElementById("thankyouName").textContent = analystName;
+
+    // Show the overlay
+    const overlay = document.getElementById("thankyouOverlay");
+    overlay.classList.add("active");
+
+    // Start fireworks animation
+    startFireworks();
+
+    // Hide the overlay after 5 seconds
+    setTimeout(() => {
+        overlay.classList.remove("active");
+        stopFireworks();
+    }, 5000);
+}
+
+/* ================================================================
+   FIREWORKS ANIMATION
+   ================================================================ */
+let fireworksAnimationId = null;
+let fireworksParticles = [];
+
+function startFireworks() {
+    const canvas = document.getElementById("fireworksCanvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.velocity = {
+                x: (Math.random() - 0.5) * 8,
+                y: (Math.random() - 0.5) * 8
+            };
+            this.alpha = 1;
+            this.decay = Math.random() * 0.015 + 0.015;
+            this.size = Math.random() * 3 + 2;
+        }
+
+        update() {
+            this.velocity.y += 0.1; // gravity
+            this.x += this.velocity.x;
+            this.y += this.velocity.y;
+            this.alpha -= this.decay;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height * 0.6;
+        const colors = [
+            '#FF1461',
+            '#18FF92',
+            '#5A87FF',
+            '#FBF38C',
+            '#FF00FF',
+            '#00FFFF',
+            '#FFD700'
+        ];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const particleCount = Math.random() * 50 + 50;
+
+        for (let i = 0; i < particleCount; i++) {
+            fireworksParticles.push(new Particle(x, y, color));
+        }
+    }
+
+    function animate() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Create new firework randomly
+        if (Math.random() < 0.05) {
+            createFirework();
+        }
+
+        // Update and draw particles
+        fireworksParticles = fireworksParticles.filter(particle => {
+            particle.update();
+            particle.draw();
+            return particle.alpha > 0;
+        });
+
+        fireworksAnimationId = requestAnimationFrame(animate);
+    }
+
+    // Create initial fireworks
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => createFirework(), i * 200);
+    }
+
+    animate();
+}
+
+function stopFireworks() {
+    if (fireworksAnimationId) {
+        cancelAnimationFrame(fireworksAnimationId);
+        fireworksAnimationId = null;
+    }
+    fireworksParticles = [];
+    const canvas = document.getElementById("fireworksCanvas");
+    if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
 
@@ -1451,6 +1728,14 @@ async function generatePDF() {
 
     const { jsPDF } = window.jspdf;
     const element   = document.getElementById("fullReport");
+
+    // FORCE LIGHT MODE FOR PDF GENERATION
+    const bodyElement = document.body;
+    const wasDarkMode = bodyElement.classList.contains('dark-mode');
+    if (wasDarkMode) {
+        bodyElement.classList.remove('dark-mode');
+        bodyElement.classList.add('light-mode');
+    }
 
     document.querySelectorAll(".autocomplete-list").forEach(d => d.style.display = "none");
 
@@ -1528,6 +1813,12 @@ async function generatePDF() {
         });
         fileInputs.forEach(fi => fi.style.display = "");
         manualBtns.forEach(b  => b.style.display  = "");
+
+        // RESTORE ORIGINAL MODE
+        if (wasDarkMode) {
+            bodyElement.classList.remove('light-mode');
+            bodyElement.classList.add('dark-mode');
+        }
     }
 }
 
@@ -1649,44 +1940,6 @@ window.addEventListener("DOMContentLoaded", () => {
     loadCrewData();
     initializeFieldTracking();
 });
-</script>
-<!-- Code injected by live-server -->
-<script>
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function () {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					var parent = elem.parentElement || head;
-					parent.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					parent.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function (msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-				console.log('Live reload enabled.');
-				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-			}
-		})();
-	}
-	else {
-		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-	}
-	// ]]>
 </script>
 <!-- Code injected by live-server -->
 <script>
