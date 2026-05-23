@@ -23,6 +23,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -363,6 +364,7 @@
         body.dark-mode .obs-row select { background: #90EE90; color: #000; border-color: #4a90d9; }
         .obs-row select.changed { background: #ff0000 !important; color: #fff !important; border-color: #cc0000 !important; }
         body.dark-mode .obs-row select.changed { background: #ff0000 !important; color: #fff !important; border-color: #cc0000 !important; }
+
         .obs-row input[type="text"] {
             width: 200px; height: 26px; padding: 3px 6px; font-size: 13px;
             background-color: #d6dde1; border: 1px solid #888; border-radius: 3px; flex-shrink: 0;
@@ -1065,9 +1067,10 @@
         </div>
     </div>
 
-    <div class="full-line"></div>
+    <div class="full-line" id="lp-screenshots-divider"></div>
 
     <!-- LP SCREENSHOTS -->
+    <div id="lp-screenshots-section">
     <div class="img-section-title">Supporting Screenshots of LP</div>
     <div class="img-grid">
         <div class="img-card"><span class="img-card-label">LP Reading Logbook</span>
@@ -1089,6 +1092,8 @@
         <div class="img-card"><span class="img-card-label">SPM Data Feeding By LP/ALP</span>
             <img id="img9" alt="SPM Data Feeding"><input type="file" accept="image/*" onchange="previewImg(event,9)"></div>
     </div>
+
+    </div><!-- /lp-screenshots-section -->
 
     <div class="full-line"></div>
 
@@ -1485,6 +1490,63 @@ function previewImg(event, id) {
     const img = document.getElementById("img" + id);
     img.src = URL.createObjectURL(file);
     img.style.display = "block";
+
+    // Auto-save: convert to base64 and store in localStorage
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        savePhotoToDraft(id, e.target.result);
+    };
+    reader.readAsDataURL(file);
+}
+
+const PHOTO_DRAFT_KEY = "cvvrs_photos_draft";
+const TOTAL_PHOTOS = 21;
+
+function savePhotoToDraft(id, base64) {
+    try {
+        const raw = localStorage.getItem(PHOTO_DRAFT_KEY);
+        const photos = raw ? JSON.parse(raw) : {};
+        photos["img" + id] = base64;
+        photos["__savedAt"] = new Date().toLocaleString();
+        localStorage.setItem(PHOTO_DRAFT_KEY, JSON.stringify(photos));
+        setAutosaveStatus("saved", "Draft saved at " + formatTime(new Date()));
+        document.getElementById("clearDraftBtn").style.display = "";
+    } catch(e) {
+        // If storage full, try removing largest photo and retry
+        setAutosaveStatus("saving", "Photo save failed (storage full?)");
+    }
+}
+
+function restorePhotosDraft() {
+    try {
+        const raw = localStorage.getItem(PHOTO_DRAFT_KEY);
+        if (!raw) return false;
+        const photos = JSON.parse(raw);
+        let restored = 0;
+        for (let i = 1; i <= TOTAL_PHOTOS; i++) {
+            const key = "img" + i;
+            if (photos[key]) {
+                const img = document.getElementById(key);
+                if (img) {
+                    img.src = photos[key];
+                    img.style.display = "block";
+                    restored++;
+                }
+            }
+        }
+        return restored > 0;
+    } catch(e) {
+        return false;
+    }
+}
+
+function clearPhotosDraft() {
+    localStorage.removeItem(PHOTO_DRAFT_KEY);
+    // Clear all img previews
+    for (let i = 1; i <= TOTAL_PHOTOS; i++) {
+        const img = document.getElementById("img" + i);
+        if (img) { img.src = ""; img.style.display = "none"; }
+    }
 }
 
 /* ================================================================
@@ -1823,8 +1885,9 @@ async function generatePDF() {
         span.className = "print-value";
         span.textContent = val || "\u00a0";
 
-        // If this select was changed (red), apply red background to the span
-        if (ctrl.tagName === "SELECT" && ctrl.classList.contains('changed')) {
+        // If this select was changed (red) AND is inside the obs-container, apply red background to the span
+        const inObsSection = ctrl.closest('.obs-container') !== null;
+        if (ctrl.tagName === "SELECT" && ctrl.classList.contains('changed') && inObsSection) {
             span.style.backgroundColor = "#ff0000";
             span.style.color = "#fff";
             span.style.padding = "4px 6px";
@@ -1842,37 +1905,62 @@ async function generatePDF() {
     fileInputs.forEach(fi => fi.style.display = "none");
     manualBtns.forEach(b  => b.style.display  = "none");
 
+    // ── Split PDF: page 1 = content above LP screenshots; page 2+ = LP screenshots onwards ──
+    const lpDivider = document.getElementById("lp-screenshots-divider");
+    const lpSectionAndBelow = [];
+    let sibling = lpDivider;
+    while (sibling) { lpSectionAndBelow.push(sibling); sibling = sibling.nextElementSibling; }
+
     try {
         showLoading("Generating PDF...");
-        const canvas = await html2canvas(element, {
+        const { jsPDF: jsPDF2 } = window.jspdf;
+        const pdf = new jsPDF2("p", "mm", "a4");
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const imgW  = pageW;
+
+        // PAGE 1: hide LP screenshots section and everything after
+        lpSectionAndBelow.forEach(el => el.style.display = "none");
+        const canvas1 = await html2canvas(element, {
             scale: 2, useCORS: true, allowTaint: true,
             scrollY: -window.scrollY,
             windowWidth: element.scrollWidth,
             windowHeight: element.scrollHeight
         });
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        const pdf     = new jsPDF("p", "mm", "a4");
-        const pageW   = pdf.internal.pageSize.getWidth();
-        const pageH   = pdf.internal.pageSize.getHeight();
-        const imgW    = pageW;
-        const imgH    = canvas.height * imgW / canvas.width;
-        let remaining = imgH, offset = 0;
+        const imgData1 = canvas1.toDataURL("image/jpeg", 0.95);
+        const imgH1 = canvas1.height * imgW / canvas1.width;
+        let rem1 = imgH1, off1 = 0;
+        pdf.addImage(imgData1, "JPEG", 0, -off1, imgW, imgH1);
+        rem1 -= pageH; off1 += pageH;
+        while (rem1 > 0) { pdf.addPage(); pdf.addImage(imgData1, "JPEG", 0, -off1, imgW, imgH1); rem1 -= pageH; off1 += pageH; }
 
-        pdf.addImage(imgData, "JPEG", 0, -offset, imgW, imgH);
-        remaining -= pageH; offset += pageH;
-        while (remaining > 0) {
-            pdf.addPage();
-            pdf.addImage(imgData, "JPEG", 0, -offset, imgW, imgH);
-            remaining -= pageH; offset += pageH;
-        }
+        // PAGE 2+: show LP section onwards, hide everything above divider
+        lpSectionAndBelow.forEach(el => el.style.display = "");
+        const page1Els = [];
+        let prev = lpDivider.previousElementSibling;
+        while (prev) { page1Els.push(prev); prev = prev.previousElementSibling; }
+        page1Els.forEach(el => el.style.display = "none");
+
+        const canvas2 = await html2canvas(element, {
+            scale: 2, useCORS: true, allowTaint: true,
+            scrollY: -window.scrollY,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+        });
+        const imgData2 = canvas2.toDataURL("image/jpeg", 0.95);
+        const imgH2 = canvas2.height * imgW / canvas2.width;
+        let rem2 = imgH2, off2 = 0;
+        pdf.addPage();
+        pdf.addImage(imgData2, "JPEG", 0, -off2, imgW, imgH2);
+        rem2 -= pageH; off2 += pageH;
+        while (rem2 > 0) { pdf.addPage(); pdf.addImage(imgData2, "JPEG", 0, -off2, imgW, imgH2); rem2 -= pageH; off2 += pageH; }
+
+        // Restore page 1 elements
+        page1Els.forEach(el => el.style.display = "");
+
         hideLoading();
-
-        // Generate dynamic filename using LP name
         const lpName = getVal("lpname").trim();
-        const filename = lpName
-            ? `CVVRS_REPORT ${lpName}.pdf`
-            : "CVVRS_Report_A4.pdf";
-
+        const filename = lpName ? `CVVRS_REPORT ${lpName}.pdf` : "CVVRS_Report_A4.pdf";
         pdf.save(filename);
     } catch (err) {
         hideLoading();
@@ -1986,7 +2074,7 @@ function checkFieldChange(field) {
     const currentValue = field.value;
     const defaultValue = defaultValues[fieldId];
 
-    // If current value differs from default, add 'changed' class (red background)
+    // If current value differs from default, add 'changed' class (red background on that dropdown only)
     if (currentValue !== defaultValue) {
         field.classList.add('changed');
     } else {
@@ -2093,6 +2181,7 @@ function restoreDraft() {
 function clearDraft() {
     if (!confirm("🗑️ Clear saved draft?\n\nAll unsaved data will be lost. This cannot be undone.")) return;
     localStorage.removeItem(DRAFT_KEY);
+    clearPhotosDraft();
     setAutosaveStatus("draft", "Draft cleared");
     document.getElementById("clearDraftBtn").style.display = "none";
     // Reset all fields
@@ -2141,9 +2230,11 @@ window.addEventListener("DOMContentLoaded", () => {
     initializeFieldTracking();
     attachAutosaveListeners();
 
-    // Restore draft if any
+    // Restore text/select draft
     const hasDraft = restoreDraft();
-    if (!hasDraft) {
+    // Restore photo draft
+    const hasPhotos = restorePhotosDraft();
+    if (!hasDraft && !hasPhotos) {
         setAutosaveStatus("draft", "Auto-save active");
     }
 });
