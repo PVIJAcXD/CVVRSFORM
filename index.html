@@ -21,6 +21,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,6 +109,49 @@
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none; z-index: 0;
+        }
+
+        /* ===== AUTO-SAVE INDICATOR ===== */
+        .autosave-bar {
+            max-width: 1200px; margin: 0 auto 6px;
+            display: flex; justify-content: flex-end; align-items: center;
+            gap: 8px; position: relative; z-index: 10;
+        }
+        .autosave-status {
+            font-size: 11.5px; font-weight: bold;
+            padding: 5px 14px; border-radius: 20px;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            background: rgba(0,0,0,0.25);
+            color: #aaffcc;
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.4s ease;
+            white-space: nowrap;
+        }
+        .autosave-status.saving { color: #ffd700; border-color: #ffd700; }
+        .autosave-status.saved  { color: #aaffcc; border-color: #4cff91; }
+        .autosave-status.draft  { color: #7ecfff; border-color: #7ecfff; }
+        .autosave-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: currentColor; display: inline-block;
+            flex-shrink: 0;
+        }
+        .autosave-status.saving .autosave-dot { animation: pulse 0.8s ease infinite; }
+        .clear-draft-btn {
+            font-size: 11.5px; font-weight: bold;
+            padding: 5px 14px; border-radius: 20px;
+            border: 1.5px solid rgba(255,100,100,0.6);
+            background: rgba(180,30,30,0.35);
+            color: #ffaaaa;
+            cursor: pointer; backdrop-filter: blur(6px);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .clear-draft-btn:hover {
+            background: rgba(220,50,50,0.6);
+            border-color: #ff6666;
+            color: #fff;
+            transform: scale(1.04);
         }
 
         /* ===== TOP BAR ===== */
@@ -574,6 +619,19 @@
 </div>
 
 <!-- ================================================================
+     AUTO-SAVE STATUS BAR
+     ================================================================ -->
+<div class="autosave-bar">
+    <div class="autosave-status draft" id="autosaveStatus">
+        <span class="autosave-dot"></span>
+        <span id="autosaveText">No draft saved</span>
+    </div>
+    <button class="clear-draft-btn" id="clearDraftBtn" onclick="clearDraft()" style="display:none;">
+        🗑️ Clear Draft
+    </button>
+</div>
+
+<!-- ================================================================
      FULL REPORT
      ================================================================ -->
 <div id="fullReport">
@@ -602,7 +660,7 @@
                      <option value="  A.R.TARAM/CLI/BIA ( R0038)">  A.R.TARAM /CLI/BIA( R0038)</option>
                            <option value=" ABDUL MOIN KHAN/CLI/BIA ( R0022)">  ABDUL MOIN KHAN/CLI/BIA ( R0022)</option>
                              <option value="  AKHILESH KUMAR/CLI/BIA ( R0064)">  AKHILESH KUMAR/CLI/BIA ( R0064)</option>
-                               <option value="  AMIT KUMAR BANKURE/CLI/BYT ( R0105)">  AMIT KUMAR BANKURE/CLI/BYT ( R0105)</option>
+                               <option value="AMIT KUMAR BANKURE/CLI/BYT/R0105">AMIT KUMAR BANKURE/CLI/BYT (R0105)</option>
                                  <option value=" ANKIT RAM KANT/CLI/BIA ( R0096)
 ">  ANKIT RAM KANT/CLI/BIA ( R0096)</option>
  <option value=" ANIL KUMAR/CLI/BIA ( R0070)
@@ -627,8 +685,7 @@
                          <option value="  DEEPANNITA PUNTAMBEKAR/CLI/BIA ( R0059)
 ">  DEEPANNITA PUNTAMBEKAR/CLI/BIA ( R0059)</option>
                           
-                             <option value="  DILLI RAO ( R0102)
-">  DILLI RAO ( R0102)</option>
+                             <option value="DILLI RAO/CLI/BYT/R0102">DILLI RAO/CLI/BYT (R0102)</option>
                                <option value="  G. C. BISWAS/CLI/R ( R0047)
 ">  G. C. BISWAS/CLI/R ( R0047)</option>
                                  <option value="  G. V. R. K. MADHU/CLI DURG ( R0010)
@@ -637,16 +694,14 @@
 ">  GIRDHARI LAL/CLI/R ( R0077)</option>
                                      <option value="  JAISHANKAR SHARMA/CLI/BIA ( R0092)
 ">  JAISHANKAR SHARMA/CLI/BIA ( R0092)</option>
-                                       <option value="  JITENDRA KUMAR MISHRA ( R0104)
-">  JITENDRA KUMAR MISHRA ( R0104)</option>
+                                       <option value="JITENDRA KUMAR MISHRA/CLI/BYT/R0104">JITENDRA KUMAR MISHRA/CLI/BYT (R0104)</option>
                                          <option value="  K P LAHARE/CLI/R ( R0089)
 ">  K P LAHARE/CLI/R ( R0089)</option>
 <option value="  KAMLESH KUMAR RAJABHOJ/CLI/BIA ( R0068)
 ">  KAMLESH KUMAR RAJABHOJ/CLI/BIA ( R0068)</option>
                                            <option value="K. K. SAHU/CLI/BIA ( R0043)
 ">  K. K. SAHU/CLI/BIA ( R0043)</option>
-                                             <option value="  K P HIRWANI ( R0108)
-"> K P HIRWANI ( R0108)</option>
+                                             <option value="K P HIRWANI/CLI/BYT/R0108">K P HIRWANI/CLI/BYT (R0108)</option>
                      <option value="  KHUSHAL SINGH/CLI/DRZ( R0042)
 ">  KHUSHAL SINGH/CLI DRZ ( R0042)</option>
                        <option value="  MAHESHWAR/CLI/BIA ( R0099)
@@ -661,10 +716,8 @@
 ">  N. R. KARPAL/CLI/BIA ( R0095)</option>
                                  <option value="  N.K. BHOI /CLI/R( R0033)
 ">  N.K. BHOI/CLI/R ( R0033)</option>
-                                   <option value=" NIRMAL KUMAR ( R0094)
-">  NIRMAL KUMAR ( R0094)</option>
-                                     <option value="  NITIN KUMAR KUKDE ( R0112)
-">  NITIN KUMAR KUKDE ( R0112)</option>
+                                   <option value="NIRMAL KUMAR/CLI/BYT/R0094">NIRMAL KUMAR/CLI/BYT (R0094)</option>
+                                     <option value="NITIN KUMAR KUKDE/CLI/BYT/R0112">NITIN KUMAR KUKDE/CLI/BYT (R0112)</option>
 
                                        <option value="  P.K. PATEL/CLI/BIA ( R0026)
 ">  P.K. PATEL/CLI/BIA ( R0026)</option>
@@ -674,8 +727,9 @@
 "> PANKAJ KUMAR SINGH/CLI/BIA ( R0072) </option>
 
                         <option value=" PAWAN KUMAR SINGH /CLI/BIA( R0069) ">  PAWAN KUMAR SINGH /CLI/BIA( R0069)</option>
-                                             <option value="PURAN LAL PATEL ( R0111)
-">  PURAN LAL PATEL ( R0111) </option>
+                                             <option value="PURAN LAL PATEL/CLI/BYT/R0111">PURAN LAL PATEL/CLI/BYT (R0111)</option>
+                                             <option value="SURENDRA KUMAR SONI/CLI/BYT/R0114">SURENDRA KUMAR SONI/CLI/BYT (R0114)</option>
+                                             <option value="SATYENDRA KUMAR/CLI/BYT/R0013">SATYENDRA KUMAR/CLI/BYT (R0013)</option>
                                               
                      <option value=" RAJENDRA KUMAR/CLI/BIA ( R0065)
 "> RAJENDRA KUMAR/CLI/BIA (R0065 )</option>
@@ -1952,11 +2006,146 @@ function preserveChangedFieldsForPDF() {
 }
 
 /* ================================================================
+   AUTO-SAVE SYSTEM — saves every field to localStorage on every change
+   and reloads all data automatically on page open.
+   ================================================================ */
+const DRAFT_KEY = "cvvrs_form_draft";
+let autosaveTimer = null;
+
+// All text/select/textarea field IDs to save
+const FORM_FIELD_IDS = [
+    // General info
+    "analysedby","month","count","locoNo","Shed","leadingCab",
+    "trainno","analysisfrom","analysisupto","section","fromstation","tostation",
+    "workingdate","departuretime","arrivaltime","analysisdate","Load","cvvrsmake",
+    // LP crew
+    "lpname","lpdesignation","lpcmsid","lphq","lpgroupcliname","lpfocussedipcamera",
+    // ALP crew
+    "alpname","alpdesignation","alpcmsid","alphq","alpgroupcliname","alpfocussedipcamera",
+    // CTO
+    "cto1_logbook","cto1_bpc","cto2","cto3","cto4",
+    // On Run
+    "run1_bft","run1_bpt","run2","run3","run4","run5","run6","run7","run8","run9","run10","run11",
+    // Halt
+    "halt1","halt2","halt3","halt4","halt5","halt6",
+    // CHO
+    "cho1","cho2","cho3",
+    // Remarks
+    "lpperformance","alpperformance","remarks"
+];
+
+function collectFormData() {
+    const data = {};
+    FORM_FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        data[id] = el.value;
+    });
+    return data;
+}
+
+function saveDraft() {
+    const data = collectFormData();
+    data["__savedAt"] = new Date().toLocaleString();
+    try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        setAutosaveStatus("saved", "Draft saved at " + formatTime(new Date()));
+        document.getElementById("clearDraftBtn").style.display = "";
+    } catch(e) {
+        setAutosaveStatus("saving", "Save failed (storage full?)");
+    }
+}
+
+function restoreDraft() {
+    try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        let restored = 0;
+        FORM_FIELD_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el || data[id] === undefined) return;
+            el.value = data[id];
+            // Unlock read-only on crew fields if they have values
+            if (el.readOnly && data[id]) {
+                el.readOnly = false;
+                el.style.opacity = "";
+                el.style.cursor = "";
+            }
+            restored++;
+        });
+        const savedAt = data["__savedAt"] || "";
+        setAutosaveStatus("draft", `Draft restored (${savedAt})`);
+        document.getElementById("clearDraftBtn").style.display = "";
+        // Re-run field change tracking to re-apply red highlights
+        setTimeout(() => {
+            FORM_FIELD_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.tagName === "SELECT") checkFieldChange(el);
+            });
+        }, 200);
+        return restored > 0;
+    } catch(e) {
+        return false;
+    }
+}
+
+function clearDraft() {
+    if (!confirm("🗑️ Clear saved draft?\n\nAll unsaved data will be lost. This cannot be undone.")) return;
+    localStorage.removeItem(DRAFT_KEY);
+    setAutosaveStatus("draft", "Draft cleared");
+    document.getElementById("clearDraftBtn").style.display = "none";
+    // Reset all fields
+    FORM_FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.tagName === "SELECT") el.selectedIndex = 0;
+        else el.value = "";
+        el.readOnly = false; el.style.opacity = ""; el.style.cursor = "";
+        el.classList.remove("changed");
+    });
+    showToast("🗑️ Draft cleared successfully", false);
+}
+
+function setAutosaveStatus(state, msg) {
+    const el = document.getElementById("autosaveStatus");
+    const txt = document.getElementById("autosaveText");
+    el.className = "autosave-status " + state;
+    txt.textContent = msg;
+}
+
+function formatTime(d) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function scheduleSave() {
+    setAutosaveStatus("saving", "Saving...");
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveDraft, 800); // debounce 800ms
+}
+
+function attachAutosaveListeners() {
+    FORM_FIELD_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const evType = (el.tagName === "SELECT") ? "change" : "input";
+        el.addEventListener(evType, scheduleSave);
+    });
+}
+
+/* ================================================================
    INIT — load crew data on page load
    ================================================================ */
 window.addEventListener("DOMContentLoaded", () => {
     loadCrewData();
     initializeFieldTracking();
+    attachAutosaveListeners();
+
+    // Restore draft if any
+    const hasDraft = restoreDraft();
+    if (!hasDraft) {
+        setAutosaveStatus("draft", "Auto-save active");
+    }
 });
 </script>
 <!-- Code injected by live-server -->
