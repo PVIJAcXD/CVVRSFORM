@@ -26,6 +26,8 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -433,8 +435,32 @@
         .img-card {
             border: 1px solid #aaa; border-radius: 5px; padding: 8px;
             background: #f8f8f8; text-align: center; transition: background 0.4s, border-color 0.4s;
+            position: relative;
         }
         body.dark-mode .img-card { background: #1e1e3a; border-color: #4a90d9; }
+
+        /* ===== DELETE PHOTO BUTTON ===== */
+        .img-delete-btn {
+            display: none;
+            position: absolute;
+            top: 6px; right: 6px;
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #e02424;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 22px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 4;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            border: 2px solid #fff;
+            user-select: none;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .img-delete-btn:hover { background: #ff3333; transform: scale(1.12); }
+        .img-delete-btn.show { display: block; }
         .img-card-label {
             font-size: 11.5px; font-weight: bold; color: #003366;
             margin-bottom: 6px; display: block; min-height: 32px;
@@ -1117,23 +1143,23 @@
     <div class="img-section-title">Supporting Screenshots of LP</div>
     <div class="img-grid">
         <div class="img-card"><span class="img-card-label">LP Reading Logbook</span>
-            <img id="img1" alt="LP Reading logbook"><input type="file" accept="image/*" onchange="previewImg(event,1)"></div>
+            <img id="img1" alt="LP Reading logbook"><span class="img-delete-btn" id="delBtn1" onclick="deleteImg(1)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,1)"></div>
         <div class="img-card"><span class="img-card-label">LP Reading BPC</span>
-            <img id="img2" alt="LP Reading BPC"><input type="file" accept="image/*" onchange="previewImg(event,2)"></div>
+            <img id="img2" alt="LP Reading BPC"><span class="img-delete-btn" id="delBtn2" onclick="deleteImg(2)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,2)"></div>
         <div class="img-card"><span class="img-card-label">LP Conducting BFT</span>
-            <img id="img3" alt="LP Conducting BFT"><input type="file" accept="image/*" onchange="previewImg(event,3)"></div>
+            <img id="img3" alt="LP Conducting BFT"><span class="img-delete-btn" id="delBtn3" onclick="deleteImg(3)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,3)"></div>
         <div class="img-card"><span class="img-card-label">LP Conducting BPT</span>
-            <img id="img4" alt="LP Conducting BPT"><input type="file" accept="image/*" onchange="previewImg(event,4)"></div>
+            <img id="img4" alt="LP Conducting BPT"><span class="img-delete-btn" id="delBtn4" onclick="deleteImg(4)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,4)"></div>
         <div class="img-card"><span class="img-card-label">LP Exchanging Signal</span>
-            <img id="img5" alt="LP Exchanging signal"><input type="file" accept="image/*" onchange="previewImg(event,5)"></div>
+            <img id="img5" alt="LP Exchanging signal"><span class="img-delete-btn" id="delBtn5" onclick="deleteImg(5)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,5)"></div>
         <div class="img-card"><span class="img-card-label">LP Calling Out Signal with Hand Gesture</span>
-            <img id="img6" alt="LP Calling out signal"><input type="file" accept="image/*" onchange="previewImg(event,6)"></div>
+            <img id="img6" alt="LP Calling out signal"><span class="img-delete-btn" id="delBtn6" onclick="deleteImg(6)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,6)"></div>
         <div class="img-card"><span class="img-card-label">LP Checking Machine Room/Undergear at Halt</span>
-            <img id="img7" alt="LP Checking machine room"><input type="file" accept="image/*" onchange="previewImg(event,7)"></div>
+            <img id="img7" alt="LP Checking machine room"><span class="img-delete-btn" id="delBtn7" onclick="deleteImg(7)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,7)"></div>
         <div class="img-card"><span class="img-card-label">LP Packing Personnel Belongings after Arrival</span>
-            <img id="img8" alt="LP Packing belongings"><input type="file" accept="image/*" onchange="previewImg(event,8)"></div>
+            <img id="img8" alt="LP Packing belongings"><span class="img-delete-btn" id="delBtn8" onclick="deleteImg(8)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,8)"></div>
         <div class="img-card"><span class="img-card-label">SPM Data Feeding By LP/ALP</span>
-            <img id="img9" alt="SPM Data Feeding"><input type="file" accept="image/*" onchange="previewImg(event,9)"></div>
+            <img id="img9" alt="SPM Data Feeding"><span class="img-delete-btn" id="delBtn9" onclick="deleteImg(9)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,9)"></div>
     </div>
     </div><!-- /loco-lp-photos -->
 
@@ -1142,17 +1168,17 @@
     <div class="img-section-title">Supporting Screenshots of LP (MEMU)</div>
     <div class="img-grid">
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel22" placeholder="Enter heading">
-            <img id="img22" alt="LP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,22)"></div>
+            <img id="img22" alt="LP screenshot"><span class="img-delete-btn" id="delBtn22" onclick="deleteImg(22)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,22)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel23" placeholder="Enter heading">
-            <img id="img23" alt="LP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,23)"></div>
+            <img id="img23" alt="LP screenshot"><span class="img-delete-btn" id="delBtn23" onclick="deleteImg(23)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,23)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel24" placeholder="Enter heading">
-            <img id="img24" alt="LP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,24)"></div>
+            <img id="img24" alt="LP screenshot"><span class="img-delete-btn" id="delBtn24" onclick="deleteImg(24)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,24)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel25" placeholder="Enter heading">
-            <img id="img25" alt="LP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,25)"></div>
+            <img id="img25" alt="LP screenshot"><span class="img-delete-btn" id="delBtn25" onclick="deleteImg(25)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,25)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel26" placeholder="Enter heading">
-            <img id="img26" alt="LP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,26)"></div>
+            <img id="img26" alt="LP screenshot"><span class="img-delete-btn" id="delBtn26" onclick="deleteImg(26)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,26)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel27" placeholder="Enter heading">
-            <img id="img27" alt="LP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,27)"></div>
+            <img id="img27" alt="LP screenshot"><span class="img-delete-btn" id="delBtn27" onclick="deleteImg(27)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,27)"></div>
     </div>
     </div><!-- /memu-lp-photos -->
 
@@ -1165,23 +1191,23 @@
     <div class="img-section-title">Supporting Screenshots of ALP</div>
     <div class="img-grid">
         <div class="img-card"><span class="img-card-label">ALP Checking RS while CTO</span>
-            <img id="img10" alt="ALP Checking RS"><input type="file" accept="image/*" onchange="previewImg(event,10)"></div>
+            <img id="img10" alt="ALP Checking RS"><span class="img-delete-btn" id="delBtn10" onclick="deleteImg(10)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,10)"></div>
         <div class="img-card"><span class="img-card-label">ALP Checking HTC and Safety Items</span>
-            <img id="img11" alt="ALP Checking HTC"><input type="file" accept="image/*" onchange="previewImg(event,11)"></div>
+            <img id="img11" alt="ALP Checking HTC"><span class="img-delete-btn" id="delBtn11" onclick="deleteImg(11)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,11)"></div>
         <div class="img-card"><span class="img-card-label">ALP Calling Out Signal with Hand Gesture</span>
-            <img id="img12" alt="ALP Calling out signal"><input type="file" accept="image/*" onchange="previewImg(event,12)"></div>
+            <img id="img12" alt="ALP Calling out signal"><span class="img-delete-btn" id="delBtn12" onclick="deleteImg(12)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,12)"></div>
         <div class="img-card"><span class="img-card-label">ALP Signal Exchange</span>
-            <img id="img13" alt="ALP Signal exchange"><input type="file" accept="image/*" onchange="previewImg(event,13)"></div>
+            <img id="img13" alt="ALP Signal exchange"><span class="img-delete-btn" id="delBtn13" onclick="deleteImg(13)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,13)"></div>
         <div class="img-card"><span class="img-card-label">ALP Look Back</span>
-            <img id="img14" alt="ALP Look back"><input type="file" accept="image/*" onchange="previewImg(event,14)"></div>
+            <img id="img14" alt="ALP Look back"><span class="img-delete-btn" id="delBtn14" onclick="deleteImg(14)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,14)"></div>
         <div class="img-card"><span class="img-card-label">ALP Standing &amp; Holding RS Valve at Danger Signal</span>
-            <img id="img15" alt="ALP Holding RS Valve"><input type="file" accept="image/*" onchange="previewImg(event,15)"></div>
+            <img id="img15" alt="ALP Holding RS Valve"><span class="img-delete-btn" id="delBtn15" onclick="deleteImg(15)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,15)"></div>
         <div class="img-card"><span class="img-card-label">ALP Checking Undergear at Halt</span>
-            <img id="img16" alt="ALP Checking undergear"><input type="file" accept="image/*" onchange="previewImg(event,16)"></div>
+            <img id="img16" alt="ALP Checking undergear"><span class="img-delete-btn" id="delBtn16" onclick="deleteImg(16)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,16)"></div>
         <div class="img-card"><span class="img-card-label">ALP Checking Machine Room at Halt</span>
-            <img id="img17" alt="ALP Checking machine room"><input type="file" accept="image/*" onchange="previewImg(event,17)"></div>
+            <img id="img17" alt="ALP Checking machine room"><span class="img-delete-btn" id="delBtn17" onclick="deleteImg(17)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,17)"></div>
         <div class="img-card"><span class="img-card-label">ALP Packing Personnel Belongings after Arrival</span>
-            <img id="img18" alt="ALP Packing belongings"><input type="file" accept="image/*" onchange="previewImg(event,18)"></div>
+            <img id="img18" alt="ALP Packing belongings"><span class="img-delete-btn" id="delBtn18" onclick="deleteImg(18)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,18)"></div>
     </div>
     </div><!-- /loco-alp-photos -->
 
@@ -1190,13 +1216,17 @@
     <div class="img-section-title">Supporting Screenshots of ALP (MEMU)</div>
     <div class="img-grid">
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel28" placeholder="Enter heading">
-            <img id="img28" alt="ALP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,28)"></div>
+            <img id="img28" alt="ALP screenshot"><span class="img-delete-btn" id="delBtn28" onclick="deleteImg(28)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,28)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel29" placeholder="Enter heading">
-            <img id="img29" alt="ALP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,29)"></div>
+            <img id="img29" alt="ALP screenshot"><span class="img-delete-btn" id="delBtn29" onclick="deleteImg(29)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,29)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel30" placeholder="Enter heading">
-            <img id="img30" alt="ALP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,30)"></div>
+            <img id="img30" alt="ALP screenshot"><span class="img-delete-btn" id="delBtn30" onclick="deleteImg(30)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,30)"></div>
         <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel31" placeholder="Enter heading">
-            <img id="img31" alt="ALP screenshot"><input type="file" accept="image/*" onchange="previewImg(event,31)"></div>
+            <img id="img31" alt="ALP screenshot"><span class="img-delete-btn" id="delBtn31" onclick="deleteImg(31)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,31)"></div>
+        <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel32" placeholder="Enter heading">
+            <img id="img32" alt="ALP screenshot"><span class="img-delete-btn" id="delBtn32" onclick="deleteImg(32)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,32)"></div>
+        <div class="img-card"><input type="text" class="img-card-label-input" id="imglabel33" placeholder="Enter heading">
+            <img id="img33" alt="ALP screenshot"><span class="img-delete-btn" id="delBtn33" onclick="deleteImg(33)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,33)"></div>
     </div>
     </div><!-- /memu-alp-photos -->
 
@@ -1206,11 +1236,11 @@
     <div class="img-section-title">ANY ABNORMALITIES -</div>
     <div class="img-grid">
         <div class="img-card"><span class="img-card-label"> Abnormality Screenshot 1</span>
-            <img id="img19" alt="ALP Abnormality 1"><input type="file" accept="image/*" onchange="previewImg(event,19)"></div>
+            <img id="img19" alt="ALP Abnormality 1"><span class="img-delete-btn" id="delBtn19" onclick="deleteImg(19)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,19)"></div>
         <div class="img-card"><span class="img-card-label">ALP Abnormality Screenshot 2</span>
-            <img id="img20" alt="ALP Abnormality 2"><input type="file" accept="image/*" onchange="previewImg(event,20)"></div>
+            <img id="img20" alt="ALP Abnormality 2"><span class="img-delete-btn" id="delBtn20" onclick="deleteImg(20)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,20)"></div>
         <div class="img-card"><span class="img-card-label"> Abnormality Screenshot 3</span>
-            <img id="img21" alt=" Abnormality 3"><input type="file" accept="image/*" onchange="previewImg(event,21)"></div>
+            <img id="img21" alt=" Abnormality 3"><span class="img-delete-btn" id="delBtn21" onclick="deleteImg(21)" title="Remove photo">&#10006;</span><input type="file" accept="image/*" onchange="previewImg(event,21)"></div>
     </div>
 
 </div><!-- /fullReport -->
@@ -1593,6 +1623,9 @@ function previewImg(event, id) {
     img.src = URL.createObjectURL(file);
     img.style.display = "block";
 
+    const delBtn = document.getElementById("delBtn" + id);
+    if (delBtn) delBtn.classList.add("show");
+
     // Auto-save: convert to base64 and store in localStorage
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -1601,8 +1634,41 @@ function previewImg(event, id) {
     reader.readAsDataURL(file);
 }
 
+/* Remove a wrongly uploaded photo (red cross button) */
+function deleteImg(id) {
+    const img = document.getElementById("img" + id);
+    const delBtn = document.getElementById("delBtn" + id);
+
+    if (img) {
+        img.src = "";
+        img.style.display = "none";
+    }
+    if (delBtn) delBtn.classList.remove("show");
+
+    // Reset the associated file input so the same file can be re-selected if needed
+    if (img) {
+        const fileInput = img.parentElement.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = "";
+    }
+
+    // Remove from saved draft in localStorage
+    try {
+        const raw = localStorage.getItem(PHOTO_DRAFT_KEY);
+        if (raw) {
+            const photos = JSON.parse(raw);
+            delete photos["img" + id];
+            photos["__savedAt"] = new Date().toLocaleString();
+            localStorage.setItem(PHOTO_DRAFT_KEY, JSON.stringify(photos));
+        }
+    } catch(e) {}
+
+    if (typeof setAutosaveStatus === "function") {
+        setAutosaveStatus("saved", "Photo removed at " + formatTime(new Date()));
+    }
+}
+
 const PHOTO_DRAFT_KEY = "cvvrs_photos_draft";
-const TOTAL_PHOTOS = 31;
+const TOTAL_PHOTOS = 33;
 
 function savePhotoToDraft(id, base64) {
     try {
@@ -1632,6 +1698,8 @@ function restorePhotosDraft() {
                 if (img) {
                     img.src = photos[key];
                     img.style.display = "block";
+                    const delBtn = document.getElementById("delBtn" + i);
+                    if (delBtn) delBtn.classList.add("show");
                     restored++;
                 }
             }
@@ -1648,6 +1716,8 @@ function clearPhotosDraft() {
     for (let i = 1; i <= TOTAL_PHOTOS; i++) {
         const img = document.getElementById("img" + i);
         if (img) { img.src = ""; img.style.display = "none"; }
+        const delBtn = document.getElementById("delBtn" + i);
+        if (delBtn) delBtn.classList.remove("show");
     }
 }
 
@@ -2032,14 +2102,27 @@ async function generatePDF() {
             windowHeight: element.scrollHeight
         });
         const imgData1 = canvas1.toDataURL("image/jpeg", 0.95);
-        const imgH1 = canvas1.height * imgW / canvas1.width;
-        let rem1 = imgH1, off1 = 0;
-        pdf.addImage(imgData1, "JPEG", 0, -off1, imgW, imgH1);
-        rem1 -= pageH; off1 += pageH;
-        while (rem1 > 0) { pdf.addPage(); pdf.addImage(imgData1, "JPEG", 0, -off1, imgW, imgH1); rem1 -= pageH; off1 += pageH; }
+        const imgH1full = canvas1.height * imgW / canvas1.width;
+        // Force ALL of page 1 (everything through Remarks) onto a single A4
+        // page — scale it down to fit the page height instead of spilling
+        // onto extra pages, so screenshots always begin on page 2.
+        let drawW1 = imgW, drawH1 = imgH1full, xOff1 = 0;
+        if (imgH1full > pageH) {
+            const fitScale = pageH / imgH1full;
+            drawW1 = imgW * fitScale;
+            drawH1 = pageH;
+            xOff1 = (pageW - drawW1) / 2;
+        }
+        pdf.addImage(imgData1, "JPEG", xOff1, 0, drawW1, drawH1);
 
         // PAGE 2+: show LP section onwards, hide everything above divider
         lpSectionAndBelow.forEach(el => el.style.display = "");
+        // Re-apply LOCO/MEMU photo visibility — the line above resets every
+        // top-level section (including loco-alp-photos / memu-alp-photos)
+        // back to visible, which would otherwise undo switchFormType()'s
+        // show/hide and print BOTH the LOCO and MEMU screenshot sets.
+        document.querySelectorAll(".photo-set-loco").forEach(el => el.style.display = (currentFormType === "loco") ? "" : "none");
+        document.querySelectorAll(".photo-set-memu").forEach(el => el.style.display = (currentFormType === "memu") ? "" : "none");
         const page1Els = [];
         let prev = lpDivider.previousElementSibling;
         while (prev) { page1Els.push(prev); prev = prev.previousElementSibling; }
@@ -2227,7 +2310,7 @@ const FORM_FIELD_IDS = [
     "lpperformance","alpperformance","remarks",
     // MEMU screenshot headings (manually entered)
     "imglabel22","imglabel23","imglabel24","imglabel25","imglabel26","imglabel27",
-    "imglabel28","imglabel29","imglabel30","imglabel31"
+    "imglabel28","imglabel29","imglabel30","imglabel31","imglabel32","imglabel33"
 ];
 
 function collectFormData() {
