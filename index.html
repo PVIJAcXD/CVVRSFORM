@@ -725,7 +725,7 @@
         <span class="autosave-dot"></span>
         <span id="autosaveText">No draft saved</span>
     </div>
-    <button class="clear-draft-btn" id="clearDraftBtn" onclick="clearDraft()" style="display:none;">
+    <button class="clear-draft-btn" id="clearDraftBtn" onclick="clearDraft()">
         🗑️ Clear Draft
     </button>
 </div>
@@ -1485,7 +1485,22 @@ const CREW_SHEET_ID  = "19KRFgB1-laDbrM6dJ9myxBJIG01FrjOApNFSAlb4oSE";
 const CREW_SHEET_GID = "0";
 
 // Google Apps Script URL for submitting report data
-const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzbkJaifRMLiySAYahEV8_nNQ1bCA23muo_ZfaaT6g5Rkyn6hOZAKE328bNqMSXLkNC/exec";
+// PASTE the Web App URL of the new Apps Script (Code.gs) here (ends with /exec).
+// That script saves rows into the new Google Sheet and PDFs into the Drive folder.
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzbI7AN1XTh3KhKJzlzXwz2xUe7GzGjrWBfbpOh3VbbzNc4xikaO0jCtEtuBbaGBdEfGA/exec";
+let lastSubmissionId = "";
+
+// Small helper: POST JSON to the Apps Script (text/plain avoids CORS preflight)
+async function postToScript(payload) {
+    if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.indexOf("PASTE_") === 0) {
+        throw new Error("Google Apps Script URL is not configured in index.html");
+    }
+    await fetch(GOOGLE_SHEET_URL, {
+        method: "POST", mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+    });
+}
 
 /* ================================================================
    CREW DATA - loaded from Google Sheet
@@ -2078,14 +2093,12 @@ async function submitToGoogleSheets() {
         // Form type (kept last so it doesn't shift the existing columns)
         "Form Type":                                  (currentFormType === "memu") ? "MEMU" : "LOCO"
     };
+    lastSubmissionId = "CVVRS-" + Date.now();
+    data["Submission ID"] = lastSubmissionId;
 
     showLoading("Submitting data to Google Sheets...");
     try {
-        await fetch(GOOGLE_SHEET_URL, {
-            method: "POST", mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
+        await postToScript({ action: "submit", data: data });
         hideLoading();
         formSubmitted = true; // Mark form as submitted
 
@@ -2370,6 +2383,23 @@ async function generatePDF() {
         const lpName = getVal("lpname").trim();
         const filename = lpName ? `CVVRS_REPORT ${lpName}.pdf` : "CVVRS_Report_A4.pdf";
         pdf.save(filename);
+
+        // Also save a copy of the PDF into the Google Drive folder
+        try {
+            showLoading("Saving PDF to Google Drive...");
+            const pdfBase64 = pdf.output("datauristring").split(",")[1];
+            await postToScript({
+                action: "pdf",
+                submissionId: lastSubmissionId,
+                filename: filename,
+                pdfBase64: pdfBase64
+            });
+            hideLoading();
+            showToast("✅ PDF saved to Google Drive");
+        } catch (driveErr) {
+            hideLoading();
+            showToast("❌ PDF downloaded, but Drive upload failed: " + driveErr.message, true);
+        }
     } catch (err) {
         hideLoading();
         alert("PDF generation failed: " + err.message);
@@ -2602,7 +2632,7 @@ function clearDraft() {
     localStorage.removeItem(DRAFT_KEY);
     clearPhotosDraft();
     setAutosaveStatus("draft", "Draft cleared");
-    document.getElementById("clearDraftBtn").style.display = "none";
+    formSubmitted = false; // allow a fresh report to be submitted after clearing
     // Reset all fields
     FORM_FIELD_IDS.forEach(id => {
         const el = document.getElementById(id);
